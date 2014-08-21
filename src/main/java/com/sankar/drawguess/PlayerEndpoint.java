@@ -4,8 +4,6 @@ import java.util.Deque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
@@ -84,37 +82,38 @@ public class PlayerEndpoint implements EndPoint {
 		room.playerQuit(player);
 	}
 	
-	private Deque<Message> pendingMessages = new ConcurrentLinkedDeque<>();
-	private Lock sendLock = new ReentrantLock();
-	
 	@Override
 	public void sendMessage(Message message) {
-		pendingMessages.add(message);
-		
-		if (sendLock.tryLock()) {
-			try {
-				if (session.isOpen()) {
-					Async async = session.getAsyncRemote();
-					
-					Message msg;
-					while((msg = pendingMessages.poll()) != null) {
-						final Message m = msg;
-						if (session.isOpen()) {
-							async.sendObject(msg, new SendHandler() {
-								@Override
-								public void onResult(SendResult sr) {
-									if (!sr.isOK()) {
-										log.error("Failed to send a [{}] message to player [{}]", m.getClass().getSimpleName(), player.getName());
-									}
-								}
-							});
-						} else pendingMessages.clear();
-					}
-				} else pendingMessages.clear();
-			} finally {
-				sendLock.unlock();
-			}
+		if (!sending)
+			sendInternal(message);
+		else
+			pendingMessages.add(message);
+	}
+	
+	private void sendInternal(Message message) {
+		if (session.isOpen()) {
+			sending = true;
+			Async async = session.getAsyncRemote();
+			async.sendObject(message, messageSentCallback);
 		}
 	}
+	
+	private boolean sending = false;
+	
+	private Deque<Message> pendingMessages = new ConcurrentLinkedDeque<>();
+	
+	private SendHandler messageSentCallback = new SendHandler() {
+		@Override
+		public void onResult(SendResult sr) {
+			if (!sr.isOK()) {
+				log.error("Failed to send a message to player [{}]", player.getName());
+			}
+			Message message;
+			if ((message = pendingMessages.poll()) != null)
+				sendInternal(message);
+			else
+				sending = false;
+		}
+	};
 	
 }
