@@ -96,6 +96,7 @@ public class PlayerEndpoint implements EndPoint {
 			Async async = session.getAsyncRemote();
 			async.sendObject(message, messageSentCallback);
 		}
+		else pendingMessages.clear();
 	}
 	
 	private boolean sending = false;

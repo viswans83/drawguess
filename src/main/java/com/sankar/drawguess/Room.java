@@ -6,7 +6,6 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.sankar.drawguess.msg.AwardMessage;
 import com.sankar.drawguess.msg.DrawingMessage;
 import com.sankar.drawguess.msg.EmptyRoomMessage;
 import com.sankar.drawguess.msg.GameInProgressMessage;
@@ -16,6 +15,7 @@ import com.sankar.drawguess.msg.NewGameMessage;
 import com.sankar.drawguess.msg.NewWordMessage;
 import com.sankar.drawguess.msg.PlayerJoinedMessage;
 import com.sankar.drawguess.msg.PlayerQuitMessage;
+import com.sankar.drawguess.msg.PlayersMessage;
 import com.sankar.drawguess.msg.StartGuessingMessage;
 
 class Room implements EndPoint {
@@ -47,6 +47,9 @@ class Room implements EndPoint {
 	}
 	
 	public synchronized void playerJoined(Player player) {
+		boolean startNewGame = false;
+		boolean sendDrawing = false;
+		
 		players.add(player);
 		
 		switch (playerCount()) {
@@ -58,13 +61,27 @@ class Room implements EndPoint {
 		case 2:
 			sendMessageToAllBut(player, new PlayerJoinedMessage(player.getName()));
 			log.info("Player [{}] joined room [{}] containing one waiting player", player.getName(), getName());
-			startNewGame();
+			startNewGame = true;
 			break;
 		
 		default:
 			sendMessageToAllBut(player, new PlayerJoinedMessage(player.getName()));
 			player.sendMessage(new GameInProgressMessage());
 			log.info("Player [{}] joined room [{}] having an in-progress game", player.getName(), getName());
+			sendDrawing = true;
+		}
+		
+		PlayersMessage pm = new PlayersMessage();
+		for (Player p : players) {
+			pm.add(p.getName(), p.getScore(), p == currentlyDrawingPlayer);
+		}
+		
+		player.sendMessage(pm);
+		
+		if (startNewGame) { 
+			startNewGame();
+		}
+		else if (sendDrawing) {
 			for (DrawingMessage drawing : drawings) {
 				player.sendMessage(drawing);
 			}
@@ -97,9 +114,13 @@ class Room implements EndPoint {
 	public synchronized void playerGuessed(GuessMessage message, Player player) {
 		if (message.getGuess().equalsIgnoreCase(currentWord)) {
 			log.info("Player [{}] guessed the word", player.getName());
-			player.sendMessage(new AwardMessage(10));
-			currentlyDrawingPlayer.sendMessage(new AwardMessage(10));
+			player.award(10);
+			currentlyDrawingPlayer.award(10);
 			startNewGame();
+		}
+		else {
+			message.setWho(player.getName());
+			sendMessageToAllBut(player, message);
 		}
 	}
 	

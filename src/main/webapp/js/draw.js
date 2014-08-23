@@ -36,6 +36,9 @@ function onload() {
 			disableDrawing();
 			addMessage('Game is in progress, spectating until next round..')
 		}
+		else if (msg.guess) {
+			addMessage(guess.who + ' guessed: ' + msg.guess)
+		}
 		else if (msg.newGame) {
 			addMessage('New Game Starting')
 			ctx.clearRect(0, 0, 300, 300)
@@ -55,6 +58,12 @@ function onload() {
 		}
 		else if (msg.playerQuit) {
 			addMessage('Player quit: ' + msg.playerQuit)
+		}
+		else if (msg.players) {
+			addMessage('Players in room:')
+			msg.players.forEach(function(v) {
+				addMessage(v.name + ', score: ' + v.score)
+			})
 		}
 		else if (msg.startGuessing) {
 			enableGuessing();
