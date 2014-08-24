@@ -39,14 +39,19 @@ class Room implements EndPoint {
 	private AtomicInteger ticks = new AtomicInteger();
 	private boolean gameInProgress;
 	
-	private WordProvider wordProvider = new WordProvider();
+	private WordProvider wordProvider;
 	
-	public Room(String name) {
+	public Room(String name, WordProvider wordProvider) {
 		this.name = name;
+		this.wordProvider = wordProvider;
 	}
 	
 	public String getName() {
 		return name;
+	}
+	
+	public synchronized boolean isGameInProgress() {
+		return gameInProgress;
 	}
 	
 	public synchronized Player getCurrentlyDrawingPlayer() {
@@ -122,10 +127,7 @@ class Room implements EndPoint {
 			player.award(10);
 			currentlyDrawingPlayer.award(10);
 		}
-		else {
-			message.setWhoGuessed(player);
-			sendMessageToAllBut(player, message);
-		}
+		else sendMessageToAllBut(player, message);
 	}
 	
 	public synchronized void playerDrew(DrawingMessage drawing) {
