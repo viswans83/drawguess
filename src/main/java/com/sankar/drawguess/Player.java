@@ -28,9 +28,13 @@ public class Player implements EndPoint {
 		sendMessage(new AwardMessage(points));
 	}
 	
+	public void resetScore() {
+		score = 0;
+	}
+	
 	@Override
 	public void sendMessage(Message message) {
 		ep.sendMessage(message);
-	}
+	}	
 	
 }

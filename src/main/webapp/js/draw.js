@@ -11,6 +11,8 @@ function onload() {
 	var wsurl = document.getElementById('wsurl')
 	var sock = new WebSocket('ws://' + wsurl.host + wsurl.pathname + '/' + room + '/' + name)
 	
+	var timeRemaining = 60;
+	
 	sock.onclose = function(ev) {
 		ctx.clearRect(0, 0, 300, 300)
 		ctx.strokeRect(0, 0, 300, 300)
@@ -18,7 +20,8 @@ function onload() {
 	}
 	
 	sock.onmessage = function(ev) {
-		var msg = JSON.parse(ev.data);
+		var msg = JSON.parse(ev.data)
+		var str
 		
 		if (msg.award) {
 			addMessage('You scored ' + msg.award + ' Points')
@@ -40,9 +43,12 @@ function onload() {
 			addMessage(guess.who + ' guessed: ' + msg.guess)
 		}
 		else if (msg.newGame) {
-			addMessage('New Game Starting')
+			timeRemaining = 60
+			addMessage('New Game Starting, you have 60 seconds')
+			
 			ctx.clearRect(0, 0, 300, 300)
 			ctx.strokeRect(0, 0, 300, 300)
+			
 			disableDrawing()
 			disableGuessing()
 		}
@@ -60,14 +66,29 @@ function onload() {
 			addMessage('Player quit: ' + msg.playerQuit)
 		}
 		else if (msg.players) {
-			addMessage('Players in room:')
+			str = 'Players in room: '
+			
 			msg.players.forEach(function(v) {
-				addMessage(v.name + ', score: ' + v.score)
+				str = str + v.name + '(' + v.score + '), '
 			})
+			str = str.slice(0, str.length - (msg.players.length == 0 ? 0 : 2))
+			
+			addMessage(str)
 		}
 		else if (msg.startGuessing) {
 			enableGuessing();
 			addMessage('Start Guessing!')
+		}
+		else if (msg.ticks) {
+			timeRemaining = timeRemaining - msg.ticks
+			
+			if (timeRemaining > 0)
+				addMessage(timeRemaining + ' seconds left in this round')
+			else
+				addMessage('Time up!')
+		}
+		else if (msg.wordGuessed) {
+			addMessage(msg.who + ' has guessed correctly')
 		}
 	}
 	

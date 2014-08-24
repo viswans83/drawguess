@@ -32,21 +32,27 @@ import com.sankar.drawguess.msg.Message;
 public class PlayerEndpoint implements EndPoint {
 	
 	private static Logger log = LogManager.getLogger();
-	
+	 
 	private static ConcurrentMap<String, Room> rooms = new ConcurrentHashMap<>();
 	
 	private Session session;
 	private Player player;
 	private Room room;
 	
+	private Timer timer;
+	
 	@Inject
-	public PlayerEndpoint() {}
+	public PlayerEndpoint(Timer timer) {
+		this.timer = timer;
+	}
 	
 	@OnOpen
 	public void onOpen(Session session, @PathParam("room") String roomName, @PathParam("player") String playerName) {
 		session.setMaxIdleTimeout(120 * 1000);
 		
-		rooms.putIfAbsent(roomName, new Room(roomName));
+		if (rooms.putIfAbsent(roomName, new Room(roomName)) == null) {
+			timer.registerInterest(rooms.get(roomName));
+		}
 		
 		this.session = session;
 		this.player = new Player(playerName, this);

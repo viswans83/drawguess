@@ -11,7 +11,11 @@ public class GuiceEndpointConfigurator extends Configurator {
 	private Injector injector = Guice.createInjector(new AbstractModule() {
 		@Override
 		protected void configure() {
+			Timer timer = new Timer();
+			timer.start();
+			
 			bind(PlayerEndpoint.class);
+			bind(Timer.class).toInstance(timer);
 		}
 	});
 	

@@ -2,6 +2,7 @@ package com.sankar.drawguess;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,6 +18,8 @@ import com.sankar.drawguess.msg.PlayerJoinedMessage;
 import com.sankar.drawguess.msg.PlayerQuitMessage;
 import com.sankar.drawguess.msg.PlayersMessage;
 import com.sankar.drawguess.msg.StartGuessingMessage;
+import com.sankar.drawguess.msg.TickMessage;
+import com.sankar.drawguess.msg.WordGuessedMessage;
 
 class Room implements EndPoint {
 	
@@ -31,6 +34,10 @@ class Room implements EndPoint {
 	
 	private List<Player> players = new ArrayList<>();
 	private int nextPlayerToDrawIndex;
+	
+	private int round;
+	private AtomicInteger ticks = new AtomicInteger();
+	private boolean gameInProgress;
 	
 	private WordProvider wordProvider = new WordProvider();
 	
@@ -48,7 +55,6 @@ class Room implements EndPoint {
 	
 	public synchronized void playerJoined(Player player) {
 		boolean startNewGame = false;
-		boolean sendDrawing = false;
 		
 		players.add(player);
 		
@@ -68,23 +74,20 @@ class Room implements EndPoint {
 			sendMessageToAllBut(player, new PlayerJoinedMessage(player.getName()));
 			player.sendMessage(new GameInProgressMessage());
 			log.info("Player [{}] joined room [{}] having an in-progress game", player.getName(), getName());
-			sendDrawing = true;
-		}
-		
-		PlayersMessage pm = new PlayersMessage();
-		for (Player p : players) {
-			pm.add(p.getName(), p.getScore(), p == currentlyDrawingPlayer);
-		}
-		
-		player.sendMessage(pm);
-		
-		if (startNewGame) { 
-			startNewGame();
-		}
-		else if (sendDrawing) {
 			for (DrawingMessage drawing : drawings) {
 				player.sendMessage(drawing);
 			}
+		}
+		
+		PlayersMessage playersMsg = new PlayersMessage();
+		for (Player p : players) {
+			playersMsg.add(p.getName(), p.getScore(), p == currentlyDrawingPlayer);
+		}
+		
+		player.sendMessage(playersMsg);
+		
+		if (startNewGame) { 
+			startNewGame();
 		}
 	}
 	
@@ -97,6 +100,7 @@ class Room implements EndPoint {
 			break;
 		
 		case 1:
+			gameInProgress = false;
 			sendMessage(new PlayerQuitMessage(player.getName()));
 			sendMessage(new EmptyRoomMessage());
 			log.info("Player [{}] quit room [{}] leaving one waiting player", player.getName(), getName());
@@ -106,7 +110,7 @@ class Room implements EndPoint {
 			sendMessage(new PlayerQuitMessage(player.getName()));
 			log.info("Player [{}] quit room [{}]", player.getName(), getName());
 			if (player.equals(currentlyDrawingPlayer)) {
-				startNewGame();
+				startNewRound();
 			}
 		}
 	}
@@ -114,9 +118,9 @@ class Room implements EndPoint {
 	public synchronized void playerGuessed(GuessMessage message, Player player) {
 		if (message.getGuess().equalsIgnoreCase(currentWord)) {
 			log.info("Player [{}] guessed the word", player.getName());
+			sendMessageToAllBut(player, new WordGuessedMessage(player));
 			player.award(10);
 			currentlyDrawingPlayer.award(10);
-			startNewGame();
 		}
 		else {
 			message.setWho(player.getName());
@@ -145,7 +149,21 @@ class Room implements EndPoint {
 				p.sendMessage(message);
 	}
 	
-	private void startNewGame() {
+	private synchronized void startNewGame() {
+		round = 0;
+		
+		for (Player p : players) {
+			p.resetScore();
+		}
+		
+		startNewRound();
+	}
+	
+	private synchronized void startNewRound() {
+		gameInProgress = true;
+		ticks.set(0);
+		round = round + 1;
+		
 		log.info("Starting a new game in room [{}]", getName());
 		drawings.clear();
 		
@@ -168,6 +186,23 @@ class Room implements EndPoint {
 		
 		currentlyDrawingPlayer = players.get(nextPlayerToDrawIndex++);
 		log.info("[{}] will draw next in room [{}]", currentlyDrawingPlayer.getName(), getName());
+	}
+	
+	public void tick() {
+		
+		if (gameInProgress) {
+			int elapsed = ticks.incrementAndGet();
+		
+			if (elapsed <= 60) {
+				if (elapsed % 5 == 0) {
+					sendMessage(new TickMessage(5));
+				}
+				
+				if (elapsed == 60) {
+					startNewRound();
+				}
+			}
+		}
 	}
 	
 }
