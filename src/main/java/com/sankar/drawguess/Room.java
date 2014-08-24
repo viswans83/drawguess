@@ -172,7 +172,7 @@ class Room implements EndPoint {
 		
 		sendMessage(new NewGameMessage());
 		currentlyDrawingPlayer.sendMessage(new NewWordMessage(currentWord));
-		sendMessageToAllBut(currentlyDrawingPlayer, new StartGuessingMessage());
+		sendMessageToAllBut(currentlyDrawingPlayer, new StartGuessingMessage(currentlyDrawingPlayer));
 	}
 	
 	private void selectNewWord() {

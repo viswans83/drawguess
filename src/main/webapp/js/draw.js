@@ -77,7 +77,7 @@ function onload() {
 		}
 		else if (msg.startGuessing) {
 			enableGuessing();
-			addMessage('Start Guessing!')
+			addMessage(msg.who + ' is now drawing, start guessing!')
 		}
 		else if (msg.ticks) {
 			timeRemaining = timeRemaining - msg.ticks
