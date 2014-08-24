@@ -68,7 +68,7 @@ public class PlayerEndpoint {
 	}
 
 	private boolean isValidDrawing(Message message) {
-		return message instanceof DrawingMessage && room.getCurrentlyDrawingPlayer().equals(player);
+		return message instanceof DrawingMessage && room.isGameInProgress() && room.getCurrentlyDrawingPlayer().equals(player);
 	}
 
 	private boolean isValidGuess(Message message) {
