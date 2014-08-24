@@ -196,8 +196,8 @@ class Room implements EndPoint {
 			int elapsed = ticks.incrementAndGet();
 		
 			if (elapsed <= 60) {
-				if (elapsed % 5 == 0) {
-					sendMessage(new TickMessage(5));
+				if (elapsed % 15 == 0) {
+					sendMessage(new TickMessage(15));
 				}
 				
 				if (elapsed == 60) {
