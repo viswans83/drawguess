@@ -4,6 +4,7 @@ import java.util.Deque;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
@@ -88,9 +89,13 @@ public class PlayerEndpoint implements EndPoint {
 		room.playerQuit(player);
 	}
 	
+	private AtomicBoolean sending = new AtomicBoolean();
+	
+	private Deque<Message> pendingMessages = new ConcurrentLinkedDeque<>();
+	
 	@Override
 	public void sendMessage(Message message) {
-		if (!sending)
+		if (!sending.compareAndSet(false, true))
 			sendInternal(message);
 		else
 			pendingMessages.add(message);
@@ -98,16 +103,15 @@ public class PlayerEndpoint implements EndPoint {
 	
 	private void sendInternal(Message message) {
 		if (session.isOpen()) {
-			sending = true;
 			Async async = session.getAsyncRemote();
-			async.sendObject(message, messageSentCallback);
+			try {
+				async.sendObject(message, messageSentCallback);
+			} catch(RuntimeException e) {
+				// Not sure why this would happen
+			}
 		}
 		else pendingMessages.clear();
 	}
-	
-	private boolean sending = false;
-	
-	private Deque<Message> pendingMessages = new ConcurrentLinkedDeque<>();
 	
 	private SendHandler messageSentCallback = new SendHandler() {
 		@Override
@@ -119,7 +123,7 @@ public class PlayerEndpoint implements EndPoint {
 			if ((message = pendingMessages.poll()) != null)
 				sendInternal(message);
 			else
-				sending = false;
+				sending.set(false);
 		}
 	};
 	
