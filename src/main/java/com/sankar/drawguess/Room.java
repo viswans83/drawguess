@@ -123,7 +123,7 @@ class Room implements EndPoint {
 			currentlyDrawingPlayer.award(10);
 		}
 		else {
-			message.setWho(player.getName());
+			message.setWhoGuessed(player);
 			sendMessageToAllBut(player, message);
 		}
 	}
@@ -199,6 +199,7 @@ class Room implements EndPoint {
 				}
 				
 				if (elapsed == 60) {
+					gameInProgress = false;
 					startNewRound();
 				}
 			}

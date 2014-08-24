@@ -40,7 +40,7 @@ function onload() {
 			addMessage('Game is in progress, spectating until next round..')
 		}
 		else if (msg.guess) {
-			addMessage(guess.who + ' guessed: ' + msg.guess)
+			addMessage(msg.who + ' guessed: ' + msg.guess)
 		}
 		else if (msg.newGame) {
 			timeRemaining = 60
