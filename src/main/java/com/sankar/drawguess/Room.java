@@ -36,8 +36,10 @@ class Room implements EndPoint {
 	private int nextPlayerToDrawIndex;
 	
 	private int round;
-	private AtomicInteger ticks = new AtomicInteger();
-	private boolean gameInProgress;
+	private AtomicInteger ticks;
+	
+	private volatile boolean gameInProgress;
+	private volatile boolean waitingBeforeNewRound;
 	
 	private WordProvider wordProvider;
 	
@@ -77,8 +79,13 @@ class Room implements EndPoint {
 		
 		default:
 			sendMessageToAllBut(player, new PlayerJoinedMessage(player.getName()));
-			player.sendMessage(new GameInProgressMessage());
-			log.info("Player [{}] joined room [{}] having an in-progress game", player.getName(), getName());
+			if (gameInProgress) {
+				player.sendMessage(new GameInProgressMessage());
+				log.info("Player [{}] joined room [{}] having an in-progress game", player.getName(), getName());
+			}
+			else {
+				log.info("Player [{}] joined empty room [{}]", player.getName(), getName());
+			}
 			for (DrawingMessage drawing : drawings) {
 				player.sendMessage(drawing);
 			}
@@ -162,8 +169,8 @@ class Room implements EndPoint {
 	}
 	
 	private synchronized void startNewRound() {
-		gameInProgress = true;
 		ticks.set(0);
+		gameInProgress = true;
 		round = round + 1;
 		
 		log.info("Starting a new game in room [{}]", getName());
@@ -191,9 +198,14 @@ class Room implements EndPoint {
 	}
 	
 	public void tick() {
-		
-		if (gameInProgress) {
-			int elapsed = ticks.incrementAndGet();
+		if (waitingBeforeNewRound) {
+			if (ticks.getAndIncrement() >= 5) {
+				waitingBeforeNewRound = false;
+				startNewRound();
+			}
+		}
+		else if (gameInProgress) {
+			int elapsed = ticks.getAndIncrement();
 		
 			if (elapsed <= 60) {
 				if (elapsed % 15 == 0) {
@@ -202,6 +214,7 @@ class Room implements EndPoint {
 				
 				if (elapsed == 60) {
 					gameInProgress = false;
+					waitingBeforeNewRound = true;
 					startNewRound();
 				}
 			}
