@@ -36,7 +36,7 @@ class Room implements EndPoint {
 	private int nextPlayerToDrawIndex;
 	
 	private int round;
-	private AtomicInteger ticks;
+	private AtomicInteger ticks = new AtomicInteger();
 	
 	private volatile boolean gameInProgress;
 	private volatile boolean waitingBeforeNewRound;
