@@ -12,11 +12,13 @@ import com.sankar.drawguess.msg.EmptyRoomMessage;
 import com.sankar.drawguess.msg.GameInProgressMessage;
 import com.sankar.drawguess.msg.GuessMessage;
 import com.sankar.drawguess.msg.Message;
-import com.sankar.drawguess.msg.NewGameMessage;
+import com.sankar.drawguess.msg.NewRoundMessage;
 import com.sankar.drawguess.msg.NewWordMessage;
 import com.sankar.drawguess.msg.PlayerJoinedMessage;
 import com.sankar.drawguess.msg.PlayerQuitMessage;
 import com.sankar.drawguess.msg.PlayersMessage;
+import com.sankar.drawguess.msg.RoundCompleteMessage;
+import com.sankar.drawguess.msg.ScoresMessage;
 import com.sankar.drawguess.msg.StartGuessingMessage;
 import com.sankar.drawguess.msg.TickMessage;
 import com.sankar.drawguess.msg.WordGuessedMessage;
@@ -27,19 +29,18 @@ class Room implements EndPoint {
 	
 	private String name;
 	
-	private Player currentlyDrawingPlayer;
+	private volatile Player currentlyDrawingPlayer;
 	private String currentWord;
 	
-	private List<DrawingMessage> drawings = new ArrayList<>();
+	private List<DrawingMessage> drawingsInRound = new ArrayList<>();
 	
 	private List<Player> players = new ArrayList<>();
 	private int nextPlayerToDrawIndex;
 	
-	private int round;
+	private int roundNumber;
 	private AtomicInteger ticks = new AtomicInteger();
 	
-	private volatile boolean gameInProgress;
-	private volatile boolean waitingBeforeNewRound;
+	private volatile RoomState roomState = RoomState.WAIT_FOR_PLAYERS;
 	
 	private WordProvider wordProvider;
 	
@@ -52,11 +53,11 @@ class Room implements EndPoint {
 		return name;
 	}
 	
-	public synchronized boolean isGameInProgress() {
-		return gameInProgress;
+	public boolean isRoundInProgress() {
+		return roomState == RoomState.ROUND_IN_PROGRESS;
 	}
 	
-	public synchronized Player getCurrentlyDrawingPlayer() {
+	public Player getCurrentlyDrawingPlayer() {
 		return currentlyDrawingPlayer;
 	}
 	
@@ -79,14 +80,14 @@ class Room implements EndPoint {
 		
 		default:
 			sendMessageToAllBut(player, new PlayerJoinedMessage(player.getName()));
-			if (gameInProgress) {
+			if (roomState == RoomState.ROUND_IN_PROGRESS) {
 				player.sendMessage(new GameInProgressMessage());
 				log.info("Player [{}] joined room [{}] having an in-progress game", player.getName(), getName());
 			}
 			else {
-				log.info("Player [{}] joined empty room [{}]", player.getName(), getName());
+				log.info("Player [{}] joined room [{}]", player.getName(), getName());
 			}
-			for (DrawingMessage drawing : drawings) {
+			for (DrawingMessage drawing : drawingsInRound) {
 				player.sendMessage(drawing);
 			}
 		}
@@ -112,7 +113,7 @@ class Room implements EndPoint {
 			break;
 		
 		case 1:
-			gameInProgress = false;
+			roomState = RoomState.WAIT_FOR_PLAYERS;
 			sendMessage(new PlayerQuitMessage(player.getName()));
 			sendMessage(new EmptyRoomMessage());
 			log.info("Player [{}] quit room [{}] leaving one waiting player", player.getName(), getName());
@@ -138,7 +139,7 @@ class Room implements EndPoint {
 	}
 	
 	public synchronized void playerDrew(DrawingMessage drawing) {
-		drawings.add(drawing);
+		drawingsInRound.add(drawing);
 		sendMessageToAllBut(currentlyDrawingPlayer, drawing);
 	}
 	
@@ -159,7 +160,7 @@ class Room implements EndPoint {
 	}
 	
 	private synchronized void startNewGame() {
-		round = 0;
+		roundNumber = 0;
 		
 		for (Player p : players) {
 			p.resetScore();
@@ -169,17 +170,18 @@ class Room implements EndPoint {
 	}
 	
 	private synchronized void startNewRound() {
-		ticks.set(0);
-		gameInProgress = true;
-		round = round + 1;
-		
 		log.info("Starting a new game in room [{}]", getName());
-		drawings.clear();
+		
+		roundNumber = roundNumber + 1;
+		
+		roomState = RoomState.ROUND_IN_PROGRESS;
+		ticks.set(0);
+		drawingsInRound.clear();
 		
 		selectNewWord();
 		selectNextPlayerToDraw();
 		
-		sendMessage(new NewGameMessage());
+		sendMessage(new NewRoundMessage());
 		currentlyDrawingPlayer.sendMessage(new NewWordMessage(currentWord));
 		sendMessageToAllBut(currentlyDrawingPlayer, new StartGuessingMessage(currentlyDrawingPlayer));
 	}
@@ -197,28 +199,45 @@ class Room implements EndPoint {
 		log.info("[{}] will draw next in room [{}]", currentlyDrawingPlayer.getName(), getName());
 	}
 	
+	@SuppressWarnings("incomplete-switch")
 	public void tick() {
-		if (waitingBeforeNewRound) {
+		switch(roomState) {
+		case WAIT_BEFORE_NEW_ROUND:
 			if (ticks.getAndIncrement() >= 5) {
-				waitingBeforeNewRound = false;
 				startNewRound();
 			}
-		}
-		else if (gameInProgress) {
+			break;
+			
+		case ROUND_IN_PROGRESS:
 			int elapsed = ticks.getAndIncrement();
 		
 			if (elapsed <= 60) {
-				if (elapsed % 15 == 0) {
-					sendMessage(new TickMessage(15));
+				if (elapsed > 0 && elapsed % 15 == 0) {
+					sendMessage(new TickMessage(elapsed));
 				}
 				
 				if (elapsed == 60) {
-					gameInProgress = false;
-					waitingBeforeNewRound = true;
-					startNewRound();
+					roundComplete();
 				}
 			}
 		}
 	}
+
+	private synchronized void roundComplete() {
+		roomState = RoomState.WAIT_BEFORE_NEW_ROUND;
+		ticks.set(0);
+		
+		sendMessage(new RoundCompleteMessage(currentWord));
+		
+		ScoresMessage scoresMsg = new ScoresMessage();
+		for (Player p : players) {
+			scoresMsg.add(p.getName(), p.getScore());
+		}
+		sendMessage(scoresMsg);
+	}
 	
+}
+
+enum RoomState {
+	ROUND_IN_PROGRESS, WAIT_BEFORE_NEW_ROUND, WAIT_FOR_PLAYERS
 }

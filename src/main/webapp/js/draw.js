@@ -42,9 +42,9 @@ function onload() {
 		else if (msg.guess) {
 			addMessage(msg.who + ' guessed: ' + msg.guess)
 		}
-		else if (msg.newGame) {
+		else if (msg.newRound) {
 			timeRemaining = 60
-			addMessage('New Game Starting, you have 60 seconds')
+			addMessage('New round Starting, you have 60 seconds')
 			
 			ctx.clearRect(0, 0, 300, 300)
 			ctx.strokeRect(0, 0, 300, 300)
@@ -75,12 +75,25 @@ function onload() {
 			
 			addMessage(str)
 		}
+		else if (msg.roundComplete) {
+			addMessage('Round complete, the word was: ' + msg.originalWord)
+		}
+		else if (msg.scores) {
+			str = 'Current Scores: '
+			
+			msg.scores.forEach(function(v) {
+				str = str + v.name + '(' + v.score + '), '
+			})
+			str = str.slice(0, str.length - (msg.scores.length == 0 ? 0 : 2))
+			
+			addMessage(str)
+		}
 		else if (msg.startGuessing) {
 			enableGuessing();
 			addMessage(msg.who + ' is now drawing, start guessing!')
 		}
 		else if (msg.ticks) {
-			timeRemaining = timeRemaining - msg.ticks
+			timeRemaining = 60 - msg.ticks
 			
 			if (timeRemaining > 0)
 				addMessage(timeRemaining + ' seconds left in this round')
@@ -89,6 +102,9 @@ function onload() {
 		}
 		else if (msg.wordGuessed) {
 			addMessage(msg.who + ' has guessed correctly')
+		}
+		else {
+			console.log('Unknown message: ' + msg)
 		}
 	}
 	

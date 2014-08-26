@@ -33,35 +33,41 @@ public class SerializingSendHandler implements EndPoint {
 	
 	@Override
 	public void sendMessage(Message message) {
-		if (!sending.compareAndSet(false, true))
-			sendInternal(message);
-		else
-			pendingMessages.add(message);
+		pendingMessages.add(message);
+		
+		if (sending.compareAndSet(false, true)) {
+			sendInternal();
+		} 
 	}
 	
-	private void sendInternal(Message message) {
-		if (session.isOpen()) {
-			Async async = session.getAsyncRemote();
-			try {
-				async.sendObject(message, messageSentCallback);
-			} catch(RuntimeException e) {
-				// Not sure why this would happen
+	private void sendInternal() {
+		Message message;
+		if ((message = pendingMessages.poll()) != null) {
+			if (session.isOpen()) {
+				Async async = session.getAsyncRemote();
+				try {
+					async.sendObject(message, messageSentCallback);
+				} catch(RuntimeException e) {
+					// Not sure why this would happen
+				}
 			}
+			else pendingMessages.clear();
 		}
-		else pendingMessages.clear();
+		else sending.set(false);
 	}
 	
 	private SendHandler messageSentCallback = new SendHandler() {
 		@Override
 		public void onResult(SendResult sr) {
+			sending.set(false);
+			
 			if (!sr.isOK()) {
 				log.error("Failed to send a message to player [{}] in room [{}]", playerName, roomName);
 			}
-			Message message;
-			if ((message = pendingMessages.poll()) != null)
-				sendInternal(message);
-			else
-				sending.set(false);
+			
+			if (sending.compareAndSet(false, true)) {
+				sendInternal();
+			}
 		}
 	};
 	

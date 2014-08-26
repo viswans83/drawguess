@@ -3,18 +3,17 @@ package com.sankar.drawguess.msg;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlayersMessage extends Message {
+public class ScoresMessage extends Message {
 	
-	private List<PlayerLite> players = new ArrayList<>();
+	private List<PlayerLite> scores = new ArrayList<>();
 	
-	public void add(String name, int score, boolean isDrawing) {
+	public void add(String name, int score) {
 		PlayerLite p = new PlayerLite();
 		
 		p.name = name;
 		p.score = score;
-		p.isDrawing = isDrawing;
 		
-		players.add(p);
+		scores.add(p);
 	}
 	
 	private static class PlayerLite {
@@ -23,9 +22,6 @@ public class PlayersMessage extends Message {
 		
 		@SuppressWarnings("unused")
 		int score;
-		
-		@SuppressWarnings("unused")
-		boolean isDrawing;
 	}
 	
 }
