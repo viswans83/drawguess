@@ -13,6 +13,57 @@ function onload() {
 	
 	var timeRemaining = 60;
 	
+	var fill_color = {r: 0, g: 0, b: 0}
+	var setupColors = function() {
+		var pal = document.getElementById('colors')
+		
+		var newSpan = function () {
+			var r = document.createElement('span')
+			r.style.paddingLeft = '37.5px'
+			return r
+		}
+		
+		var rgb = function(r, g, b) {
+			return {
+				r: r,
+				g: g,
+				b: b
+			}
+		}
+		
+		var colors = [
+		    rgb(0, 31, 63),
+			rgb(0, 116, 217),
+			rgb(127, 219, 255),
+			rgb(57, 204, 204),
+			rgb(61, 153, 112),
+			rgb(46, 204, 64),
+			rgb(1, 255, 112),
+			rgb(255, 220, 0),
+			rgb(255, 133, 27),
+			rgb(255, 65, 54),
+			rgb(133, 20, 75),
+			rgb(240, 18, 190),
+			rgb(177, 13, 201),
+			rgb(17, 17, 17),
+			rgb(170, 170, 170),
+			rgb(221, 221, 221)
+		]
+		
+		colors.forEach(function(c) {
+			var item = newSpan()
+			item.style.backgroundColor = 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')'
+			item.data = c
+			item.addEventListener('click', function(ev) {
+				fill_color = c
+			})
+			pal.appendChild(item)
+		})
+		
+	}
+	
+	setupColors()
+	
 	sock.onclose = function(ev) {
 		clearCanvas()
 		addMessage('** You have been disconnected from this game room **')
@@ -420,22 +471,14 @@ function onload() {
 			floodFill({
 				x: last_mx,
 				y: last_my
-			},{
-				r: 255,
-				g: 0,
-				b: 0
-			})
+			}, fill_color)
 			
 			sock.send(JSON.stringify({
 				floodFill: {
 					x: last_mx,
 					y: last_my
 				},
-				color: {
-					r: 255,
-					g: 0,
-					b: 0
-				}
+				color: fill_color
 			}))
 		}
 	})
