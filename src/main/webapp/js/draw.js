@@ -268,6 +268,9 @@ function onload() {
 	    pts.push(p)
 	    while (pts.length > 0) {
 	        p = pts.pop()
+	        
+	        if (colorEq(targetColor, getColor(img, p))) continue;
+	        
 	        left = {
 	            x: p.x,
 	            y: p.y
@@ -291,32 +294,36 @@ function onload() {
 	            if (!colorEq(rightc, origColor)) break
 	        }
 
-	        right.x = right.x - 1
-
-	        coloru = getColor(img, {
-	            x: p.x,
-	            y: p.y - 1
-	        })
-	        if (p.y - 1 >= 0 && colorEq(origColor, coloru)) {
-	            pts.push({
-	                x: p.x,
-	                y: p.y - 1
-	            })
-	        }
-
-	        colord = getColor(img, {
-	            x: p.x,
-	            y: p.y + 1
-	        })
-	        if (p.y + 1 < 300 && colorEq(origColor, colord)) {
-	            pts.push({
-	                x: p.x,
-	                y: p.y + 1
-	            })
-	        }
+	        right.x = right.x - 1	        
 
 	        for (; left.x <= right.x; left.x = left.x + 1) {
 	            setColor(img, left, targetColor)
+	            
+	            if (left.y - 1 >= 0) {
+		            coloru = getColor(img, {
+			            x: left.x,
+			            y: left.y - 1
+			        })
+			        if (colorEq(origColor, coloru)) {
+			            pts.push({
+			                x: left.x,
+			                y: left.y - 1
+			            })
+			        }
+	            }
+	
+	            if (left.y + 1 < 300) {
+		            colord = getColor(img, {
+			            x: left.x,
+			            y: left.y + 1
+			        })
+			        if (colorEq(origColor, colord)) {
+			            pts.push({
+			                x: left.x,
+			                y: left.y + 1
+			            })
+			        }
+	            }
 	        }
 	    }
 	    
