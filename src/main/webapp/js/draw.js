@@ -14,8 +14,7 @@ function onload() {
 	var timeRemaining = 60;
 	
 	sock.onclose = function(ev) {
-		ctx.clearRect(0, 0, 300, 300)
-		ctx.strokeRect(0, 0, 300, 300)
+		clearCanvas()
 		addMessage('** You have been disconnected from this game room **')
 	}
 	
@@ -46,15 +45,13 @@ function onload() {
 			timeRemaining = 60
 			addMessage('New round Starting, you have 60 seconds')
 			
-			ctx.clearRect(0, 0, 300, 300)
-			ctx.strokeRect(0, 0, 300, 300)
+			clearCanvas()
 			
 			disableDrawing()
 			disableGuessing()
 		}
 		else if (msg.newWord) {
-			ctx.clearRect(0, 0, 300, 300)
-			ctx.strokeRect(0, 0, 300, 300)
+			clearCanvas()
 			addMessage('Your turn to draw! Your word: ' + msg.newWord)
 			enableDrawing()
 			disableGuessing()
@@ -235,15 +232,110 @@ function onload() {
         }
         ctx.stroke()
 	}
+	
+	var floodFill = function (p, targetColor) {
+		var getColor = function (img, p) {
+			var pos = ((p.y - 1) * 300 + p.x) * 4
+		    var c = img.data
+		    return {
+		        r: c[pos + 0],
+		        g: c[pos + 1],
+		        b: c[pos + 2],
+		        a: c[pos + 3]
+		    }
+		}
 
+		var setColor = function (img, p, color) {
+			var pos = ((p.y - 1) * 300 + p.x) * 4
+		    var c = img.data
+		    c[pos + 0] = color.r
+		    c[pos + 1] = color.g
+		    c[pos + 2] = color.b
+		    c[pos + 3] = 255
+		}
+		
+		var colorEq = function (c1, c2) {
+		    return c1.r == c2.r && c1.g == c2.g && c1.b == c2.b && c1.a == c2.a
+		}
+		
+		var img = ctx.getImageData(0, 0, 300, 300)
+		
+	    var origColor = getColor(img, p)
+	    var pts = []
+
+	    var left, right, leftc, rightc, coloru, colord
+
+	    pts.push(p)
+	    while (pts.length > 0) {
+	        p = pts.pop()
+	        left = {
+	            x: p.x,
+	            y: p.y
+	        }
+	        right = {
+	            x: p.x,
+	            y: p.y
+	        }
+
+	        while (left.x > 0) {
+	            left.x = left.x - 1
+	            leftc = getColor(img, left)
+	            if (!colorEq(leftc, origColor)) break
+	        }
+
+	        left.x = left.x + 1
+
+	        while (right.x < 300) {
+	            right.x = right.x + 1
+	            rightc = getColor(img, right)
+	            if (!colorEq(rightc, origColor)) break
+	        }
+
+	        right.x = right.x - 1
+
+	        coloru = getColor(img, {
+	            x: p.x,
+	            y: p.y - 1
+	        })
+	        if (p.y - 1 >= 0 && colorEq(origColor, coloru)) {
+	            pts.push({
+	                x: p.x,
+	                y: p.y - 1
+	            })
+	        }
+
+	        colord = getColor(img, {
+	            x: p.x,
+	            y: p.y + 1
+	        })
+	        if (p.y + 1 < 300 && colorEq(origColor, colord)) {
+	            pts.push({
+	                x: p.x,
+	                y: p.y + 1
+	            })
+	        }
+
+	        for (; left.x <= right.x; left.x = left.x + 1) {
+	            setColor(img, left, targetColor)
+	        }
+	    }
+	    
+	    ctx.putImageData(img, 0, 0)
+	}
+	
 	var points_acc = []
 	var collecting = false
 
 	var old_x, old_y
 
+	var last_mx, last_my
+	
 	var moveHandler = function (ev) {
 	    var new_x = ev.pageX - can.offsetLeft
 	    var new_y = ev.pageY - can.offsetTop
+	    
+	    last_mx = new_x
+	    last_my = new_y
 
 	    if (collecting) {
 	        ctx.beginPath()
@@ -291,19 +383,37 @@ function onload() {
 	        sock.send(JSON.stringify({drawing: r}))
 	    }
 	}
-
-	ctx.strokeStyle = 'black'
-
-	ctx.clearRect(0, 0, 300, 300)
-	ctx.strokeRect(0, 0, 300, 300)	
 	
+	var clearCanvas = function() {
+		ctx.clearRect(0, 0, 300, 300)
+		ctx.strokeRect(0, 0, 300, 300)
+	}
+
+	ctx.lineWidth = 1
+	ctx.lineCap = 'round'
+	ctx.strokeStyle = 'black'		
+	
+	clearCanvas()
 	disableDrawing()
 	disableGuessing()
 	
 	guess.addEventListener('keydown', function(ev) {
-		if(event.which == 13) {
+		if (event.which == 13) {
 			sock.send(JSON.stringify({guess: guess.value}))
 			guess.value = ''
+		}
+	})
+	
+	document.body.addEventListener('keydown', function(ev) {
+		if (event.which == 70 && last_mx && last_my) {
+			floodFill({
+				x: last_mx,
+				y: last_my
+			},{
+				r: 255,
+				g: 0,
+				b: 0
+			})
 		}
 	})
 }
