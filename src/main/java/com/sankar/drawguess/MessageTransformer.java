@@ -13,6 +13,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 import com.sankar.drawguess.msg.DrawingMessage;
+import com.sankar.drawguess.msg.FloodFillMessage;
 import com.sankar.drawguess.msg.GuessMessage;
 import com.sankar.drawguess.msg.Message;
 
@@ -44,6 +45,7 @@ public class MessageTransformer implements Decoder.Text<Message>, Encoder.Text<M
 			switch(type) {
 			case "drawing": return gson.fromJson(msg, DrawingMessage.class);
 			case "guess": return gson.fromJson(msg, GuessMessage.class);
+			case "floodFill": return gson.fromJson(msg, FloodFillMessage.class);
 			default: throw new UnknownMessageException();
 			}
 		} catch (IOException e) {

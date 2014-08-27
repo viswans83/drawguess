@@ -9,5 +9,9 @@ public abstract class Message {
 	public DrawingMessage asDrawing() {
 		return (DrawingMessage)this;
 	}
+
+	public FloodFillMessage asFloodFill() {
+		return (FloodFillMessage)this;
+	}
 	
 }

@@ -33,6 +33,9 @@ function onload() {
 			disableDrawing();
 			addMessage('Room is empty, waiting for players to join..')
 		}
+		else if (msg.floodFill) {
+			floodFill(msg.floodFill, msg.color)
+		}
 		else if (msg.gameInProgress) {
 			disableGuessing();
 			disableDrawing();
@@ -413,6 +416,7 @@ function onload() {
 	
 	document.body.addEventListener('keydown', function(ev) {
 		if (event.which == 70 && last_mx && last_my) {
+			
 			floodFill({
 				x: last_mx,
 				y: last_my
@@ -421,6 +425,18 @@ function onload() {
 				g: 0,
 				b: 0
 			})
+			
+			sock.send(JSON.stringify({
+				floodFill: {
+					x: last_mx,
+					y: last_my
+				},
+				color: {
+					r: 255,
+					g: 0,
+					b: 0
+				}
+			}))
 		}
 	})
 }

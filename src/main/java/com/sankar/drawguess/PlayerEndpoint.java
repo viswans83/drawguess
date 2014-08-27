@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.google.inject.Inject;
 import com.sankar.drawguess.msg.DrawingMessage;
+import com.sankar.drawguess.msg.FloodFillMessage;
 import com.sankar.drawguess.msg.GuessMessage;
 import com.sankar.drawguess.msg.Message;
 
@@ -63,16 +64,24 @@ public class PlayerEndpoint {
 			message.asGuess().setWhoGuessed(player);
 			room.playerGuessed(message.asGuess(), player);
 		}
+		
 		else if (isValidDrawing(message))
 			room.playerDrew(message.asDrawing());
-	}
-
-	private boolean isValidDrawing(Message message) {
-		return message instanceof DrawingMessage && room.isRoundInProgress() && room.getCurrentlyDrawingPlayer().equals(player);
-	}
+		
+		else if (isValidFloodFill(message))
+			room.playerFloodFilled(message.asFloodFill());
+	}	
 
 	private boolean isValidGuess(Message message) {
 		return message instanceof GuessMessage && room.isRoundInProgress() && !room.getCurrentlyDrawingPlayer().equals(player) && message.asGuess().getGuess() != null;
+	}
+	
+	private boolean isValidDrawing(Message message) {
+		return message instanceof DrawingMessage && room.isRoundInProgress() && room.getCurrentlyDrawingPlayer().equals(player);
+	}
+	
+	private boolean isValidFloodFill(Message message) {
+		return message instanceof FloodFillMessage && room.isRoundInProgress() && room.getCurrentlyDrawingPlayer().equals(player);
 	}
 	
 	@OnError
