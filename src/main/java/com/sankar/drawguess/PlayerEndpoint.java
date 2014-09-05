@@ -55,21 +55,21 @@ public class PlayerEndpoint {
 		this.player = new Player(playerName, sendHandler);
 		this.room = rooms.get(roomName);
 		
-		room.playerJoined(player);
+		player.joinRoom(room);
 	}
 	
 	@OnMessage
 	public void onMessage(Message message) {
 		if (isValidGuess(message)) {
 			message.asGuess().setWhoGuessed(player);
-			room.playerGuessed(message.asGuess(), player);
+			player.guessed(message.asGuess());
 		}
 		
 		else if (isValidDrawing(message))
-			room.playerDrew(message.asDrawing());
+			player.drew(message.asDrawing());
 		
 		else if (isValidFloodFill(message))
-			room.playerFloodFilled(message.asFloodFill());
+			player.floodFilled(message.asFloodFill());
 	}	
 
 	private boolean isValidGuess(Message message) {
@@ -91,7 +91,7 @@ public class PlayerEndpoint {
 	
 	@OnClose
 	public void onClose() {
-		room.playerQuit(player);
+		player.leaveCurrentRoom();
 	}
 	
 }
