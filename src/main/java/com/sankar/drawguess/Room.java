@@ -24,7 +24,7 @@ import com.sankar.drawguess.msg.StartGuessingMessage;
 import com.sankar.drawguess.msg.TickMessage;
 import com.sankar.drawguess.msg.WordGuessedMessage;
 
-class Room implements EndPoint {
+class Room implements Timed {
 	
 	private static Logger log = LogManager.getLogger();
 	
@@ -52,6 +52,10 @@ class Room implements EndPoint {
 	
 	public String getName() {
 		return name;
+	}
+	
+	public synchronized boolean isPlayerStillPresent(Player player) {
+		return players.contains(player);
 	}
 	
 	public boolean isRoundInProgress() {
@@ -153,7 +157,6 @@ class Room implements EndPoint {
 		return players.size();
 	}
 	
-	@Override
 	public synchronized void sendMessage(Message message) {
 		for (Player p : players)
 			p.sendMessage(message);
@@ -205,6 +208,7 @@ class Room implements EndPoint {
 		log.info("[{}] will draw next in room [{}]", currentlyDrawingPlayer.getName(), getName());
 	}
 	
+	@Override
 	@SuppressWarnings("incomplete-switch")
 	public void tick() {
 		switch(roomState) {

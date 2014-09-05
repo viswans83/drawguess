@@ -6,19 +6,19 @@ import java.util.Set;
 
 public class Timer extends Thread {
 	
-	private Set<Room> rooms = Collections.synchronizedSet(new HashSet<Room>());
+	private Set<Timed> interested = Collections.synchronizedSet(new HashSet<Timed>());
 	
 	public Timer() {
 		setName("Game Timer");
 		setDaemon(true);
 	}
 	
-	public void registerInterest(Room room) {
-		rooms.add(room);
+	public void registerInterest(Timed timed) {
+		interested.add(timed);
 	}
 	
-	public void unregisterInterest(Room room) {
-		rooms.remove(room);
+	public void unregisterInterest(Timed timed) {
+		interested.remove(timed);
 	}
 
 	@Override
@@ -26,9 +26,9 @@ public class Timer extends Thread {
 		while (true) {
 			try {
 				Thread.sleep(1000);
-				synchronized(rooms) {
-					for (Room r : rooms) {
-						r.tick();
+				synchronized(interested) {
+					for (Timed t : interested) {
+						t.tick();
 					}
 				}
 			} catch(InterruptedException e) {

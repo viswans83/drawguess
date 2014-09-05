@@ -3,7 +3,7 @@ package com.sankar.drawguess;
 import com.sankar.drawguess.msg.AwardMessage;
 import com.sankar.drawguess.msg.Message;
 
-public class Player implements EndPoint {
+public class Player {
 	
 	private String name;
 	private int score;
@@ -32,7 +32,6 @@ public class Player implements EndPoint {
 		score = 0;
 	}
 	
-	@Override
 	public void sendMessage(Message message) {
 		ep.sendMessage(message);
 	}	
