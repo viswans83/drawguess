@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.sankar.drawguess.msg.AwardMessage;
 import com.sankar.drawguess.msg.DrawingMessage;
 import com.sankar.drawguess.msg.EmptyRoomMessage;
 import com.sankar.drawguess.msg.GameInProgressMessage;
@@ -17,9 +18,7 @@ import com.sankar.drawguess.msg.NewRoundMessage;
 import com.sankar.drawguess.msg.NewWordMessage;
 import com.sankar.drawguess.msg.PlayerJoinedMessage;
 import com.sankar.drawguess.msg.PlayerQuitMessage;
-import com.sankar.drawguess.msg.PlayersMessage;
 import com.sankar.drawguess.msg.RoundCompleteMessage;
-import com.sankar.drawguess.msg.ScoresMessage;
 import com.sankar.drawguess.msg.StartGuessingMessage;
 import com.sankar.drawguess.msg.TickMessage;
 import com.sankar.drawguess.msg.WordGuessedMessage;
@@ -32,6 +31,9 @@ class Room implements EndPoint, Timed {
 	
 	private List<Player> players = new ArrayList<>();
 	private List<Player> spectators = new ArrayList<>();
+	private List<Player> guessed = new ArrayList<>();
+	
+	private Scores scores;
 	
 	private String currentWord;
 	private volatile Player currentlyDrawingPlayer;
@@ -68,7 +70,7 @@ class Room implements EndPoint, Timed {
 	public synchronized void playerJoined(Player player) {
 		boolean startNewGame = false;
 		
-		switch (playerCount()) {
+		switch (players.size()) {
 		case 0: 
 			players.add(player);
 			player.sendMessage(new EmptyRoomMessage());
@@ -96,10 +98,30 @@ class Room implements EndPoint, Timed {
 			sendDrawings(player);
 		}
 		
-		player.sendMessage(createPlayersMessage());
-		
 		if (startNewGame) { 
 			startNewGame();
+		}
+	}
+	
+	public synchronized void playerQuit(Player player) {
+		boolean playerLeft = players.remove(player);
+		boolean spectatorLeft = spectators.remove(player);
+		
+		log.info("Player [{}] quit room [{}]", player.getName(), getName());
+		sendMessage(new PlayerQuitMessage(player.getName()));
+		
+		if (playerLeft && roomState == RoomState.ROUND_IN_PROGRESS) {
+			if (players.size() == 1) {
+				log.info("There are no remaining players to continue the current in-progress game in room [{}]", getName());
+				if (spectators.size() > 0) {
+					log.info("There are spectators in room [{}], starting a new game", getName());
+					startNewGame();
+				}
+				else {
+					sendMessage(new EmptyRoomMessage());
+					roomState = RoomState.WAIT_FOR_PLAYERS;
+				}
+			}
 		}
 	}
 
@@ -108,54 +130,21 @@ class Room implements EndPoint, Timed {
 			player.sendMessage(drawing);
 		}
 	}
-
-	private PlayersMessage createPlayersMessage() {
-		PlayersMessage playersMsg = new PlayersMessage();
-		for (Player p : players) {
-			p.populate(playersMsg, isCurrentlyDrawing(p));
-		}
-		return playersMsg;
-	}
-	
-	public synchronized void playerQuit(Player player) {
-		players.remove(player);
-		
-		switch (playerCount()) {
-		case 0:
-			log.info("Player [{}] quit room [{}] leaving it empty", player.getName(), getName());
-			break;
-		
-		case 1:
-			roomState = RoomState.WAIT_FOR_PLAYERS;
-			sendMessage(new PlayerQuitMessage(player.getName()));
-			sendMessage(new EmptyRoomMessage());
-			
-			players.addAll(spectators);
-			spectators.clear();
-			
-			if (playerCount() == 1) {
-				log.info("Player [{}] quit room [{}] leaving one waiting player", player.getName(), getName());
-			} else {
-				log.info("Player [{}] quit room [{}] and there is nobody to finish this game, but there are other spectators so starting a new game", player.getName(), getName());
-				startNewGame();
-			}
-			break;
-		
-		default:
-			sendMessage(new PlayerQuitMessage(player.getName()));
-			log.info("Player [{}] quit room [{}]", player.getName(), getName());
-			if (isCurrentlyDrawing(player)) {
-				startNewRound();
-			}
-		}
-	}
 	
 	public synchronized void playerGuessed(GuessMessage message, Player player) {
-		if (message.getGuess().equalsIgnoreCase(currentWord)) {
+		if (message.getGuess().equalsIgnoreCase(currentWord) && !didAlreadyGuess(player)) {
 			log.info("Player [{}] guessed the word", player.getName());
+			
+			guessed.add(player);
 			sendMessageToAllBut(player, new WordGuessedMessage(player));
-			player.award(10);
-			currentlyDrawingPlayer.award(10);
+			
+			scores.award(currentlyDrawingPlayer, 10);
+			currentlyDrawingPlayer.sendMessage(new AwardMessage(10));
+			
+			scores.award(player, 10);
+			player.sendMessage(new AwardMessage(10));
+			
+			scores.transmit(this);
 		}
 		else sendMessageToAllBut(player, message);
 	}
@@ -163,10 +152,6 @@ class Room implements EndPoint, Timed {
 	public synchronized void playerDrew(DrawingMessage drawing) {
 		drawingsInRound.add(drawing);
 		sendMessageToAllBut(currentlyDrawingPlayer, drawing);
-	}
-	
-	public synchronized int playerCount() {
-		return players.size();
 	}
 	
 	@Override
@@ -190,16 +175,14 @@ class Room implements EndPoint, Timed {
 	private synchronized void startNewGame() {
 		log.info("Starting a new game in room [{}]", getName());
 		
-		for (Player p : players) {
-			p.resetScore();
-		}
-		
 		players.addAll(spectators);
 		spectators.clear();
 		
 		playerSelector = new DefaultPlayerSelector(this, players);
+		scores = new Scores(players);
 		
 		sendMessage(new NewGameMessage());
+		scores.transmit(this);
 		startNewRound();
 	}
 	
@@ -208,9 +191,12 @@ class Room implements EndPoint, Timed {
 		
 		roomState = RoomState.ROUND_IN_PROGRESS;
 		ticks.set(0);
+		
 		drawingsInRound.clear();
+		guessed.clear();
 		
 		if (!playerSelector.hasMorePlayers()) {
+			scores.transmit(this);
 			startNewGame();
 			return;
 		}
@@ -262,15 +248,7 @@ class Room implements EndPoint, Timed {
 		ticks.set(0);
 		
 		sendMessage(new RoundCompleteMessage(currentWord));
-		sendMessage(createScoresMessage());
-	}
-
-	private ScoresMessage createScoresMessage() {
-		ScoresMessage scoresMsg = new ScoresMessage();
-		for (Player p : players) {
-			p.populate(scoresMsg);
-		}
-		return scoresMsg;
+		scores.transmit(this);
 	}
 	
 	public boolean canGuess(Player player) {
@@ -287,6 +265,10 @@ class Room implements EndPoint, Timed {
 	
 	private boolean isSpectating(Player player) {
 		return spectators.contains(player);
+	}
+	
+	private boolean didAlreadyGuess(Player player) {
+		return guessed.contains(player);
 	}
 	
 }

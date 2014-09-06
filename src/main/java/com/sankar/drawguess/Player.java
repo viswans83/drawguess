@@ -1,16 +1,12 @@
 package com.sankar.drawguess;
 
-import com.sankar.drawguess.msg.AwardMessage;
 import com.sankar.drawguess.msg.DrawingMessage;
 import com.sankar.drawguess.msg.GuessMessage;
 import com.sankar.drawguess.msg.Message;
-import com.sankar.drawguess.msg.PlayersMessage;
-import com.sankar.drawguess.msg.ScoresMessage;
 
 public class Player implements EndPoint {
 	
 	private String name;
-	private int score;
 	private Room room;
 	
 	private EndPoint ep;
@@ -22,15 +18,6 @@ public class Player implements EndPoint {
 	
 	public String getName() {
 		return name;
-	}
-	
-	public void award(int points) {
-		score = score + points;
-		sendMessage(new AwardMessage(points));
-	}
-	
-	public void resetScore() {
-		score = 0;
 	}
 	
 	@Override
@@ -53,19 +40,15 @@ public class Player implements EndPoint {
 	}
 	
 	public void guessed(GuessMessage guess) {
+		if (room == null) throw new IllegalStateException();
+		
 		room.playerGuessed(guess, this);
 	}
 	
 	public void drew(DrawingMessage drawing) {
+		if (room == null) throw new IllegalStateException();
+		
 		room.playerDrew(drawing);
-	}
-	
-	public void populate(ScoresMessage msg) {
-		msg.add(name, score);
-	}
-	
-	public void populate(PlayersMessage msg, boolean currentlyDrawing) {
-		msg.add(name, score, currentlyDrawing);
 	}
 	
 }

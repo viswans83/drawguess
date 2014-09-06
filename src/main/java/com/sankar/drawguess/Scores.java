@@ -27,7 +27,7 @@ public class Scores {
 	private ScoresMessage buildMessage() {
 		ScoresMessage scoresMsg = new ScoresMessage();
 		for (Player p : scores.keySet()) {
-			p.populate(scoresMsg);
+			scoresMsg.add(p.getName(), scores.get(p));
 		}
 		return scoresMsg;
 	}
