@@ -40,11 +40,15 @@ public class Player {
 	}
 	
 	public void joinRoom(Room room) {
+		if (this.room != null) throw new IllegalStateException();
+			
 		this.room = room;
 		room.playerJoined(this);
 	}
 	
 	public void leaveCurrentRoom() {
+		if (room == null) throw new IllegalStateException();
+		
 		room.playerQuit(this);
 		room = null;
 	}
