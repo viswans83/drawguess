@@ -13,6 +13,9 @@ function onload() {
 	
 	var timeRemaining = 60;
 	
+	var drawingEnabled = false;
+	var guessingEnabled = false;
+	
 	var fill_color = {r: 0, g: 0, b: 0}
 	var setupColors = function() {
 		var pal = document.getElementById('colors')
@@ -95,6 +98,9 @@ function onload() {
 		else if (msg.lineDrawing) {
 			draw_points(msg.lineDrawing)
 		}
+		else if (msg.newGame) {
+			addMessage('*** New game Starting ***')
+		}
 		else if (msg.newRound) {
 			timeRemaining = 60
 			addMessage('New round Starting, you have 60 seconds')
@@ -162,21 +168,25 @@ function onload() {
 	function enableGuessing() {
 		guess.value = ''
 		guess.disabled = false
+		guessingEnabled = true
 	}
 	
 	function disableGuessing() {
 		guess.value = ''
 		guess.disabled = true
+		guessingEnabled = false
 	}
 	
 	function enableDrawing() {
 		can.addEventListener('mousemove', moveHandler, false)
 		can.addEventListener('click', clickHandler, false)
+		drawingEnabled = true
 	}
 	
 	function disableDrawing() {
 		can.removeEventListener('mousemove', moveHandler, false)
 		can.removeEventListener('click', clickHandler, false)
+		drawingEnabled = false
 	}
 	
 	var addMessage = function (value) {
@@ -466,7 +476,7 @@ function onload() {
 	})
 	
 	document.body.addEventListener('keydown', function(ev) {
-		if (event.which == 70 && last_mx && last_my) {
+		if (drawingEnabled && event.which == 70 && last_mx && last_my) {
 			
 			floodFill({
 				x: last_mx,

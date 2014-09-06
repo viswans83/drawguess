@@ -12,6 +12,7 @@ import com.sankar.drawguess.msg.EmptyRoomMessage;
 import com.sankar.drawguess.msg.GameInProgressMessage;
 import com.sankar.drawguess.msg.GuessMessage;
 import com.sankar.drawguess.msg.Message;
+import com.sankar.drawguess.msg.NewGameMessage;
 import com.sankar.drawguess.msg.NewRoundMessage;
 import com.sankar.drawguess.msg.NewWordMessage;
 import com.sankar.drawguess.msg.PlayerJoinedMessage;
@@ -23,26 +24,25 @@ import com.sankar.drawguess.msg.StartGuessingMessage;
 import com.sankar.drawguess.msg.TickMessage;
 import com.sankar.drawguess.msg.WordGuessedMessage;
 
-class Room implements Timed {
+class Room implements EndPoint, Timed {
 	
 	private static Logger log = LogManager.getLogger();
 	
 	private String name;
 	
-	private volatile Player currentlyDrawingPlayer;
+	private List<Player> players = new ArrayList<>();
+	private List<Player> spectators = new ArrayList<>();
+	
 	private String currentWord;
+	private volatile Player currentlyDrawingPlayer;
+	
+	private WordProvider wordProvider;
+	private PlayerSelector playerSelector;
 	
 	private List<DrawingMessage> drawingsInRound = new ArrayList<>();
 	
-	private List<Player> players = new ArrayList<>();
-	private int nextPlayerToDrawIndex;
-	
-	private int roundNumber;
-	private AtomicInteger ticks = new AtomicInteger();
-	
 	private volatile RoomState roomState = RoomState.WAIT_FOR_PLAYERS;
-	
-	private WordProvider wordProvider;
+	private AtomicInteger ticks = new AtomicInteger();
 	
 	public Room(String name, WordProvider wordProvider) {
 		this.name = name;
@@ -53,7 +53,7 @@ class Room implements Timed {
 		return name;
 	}
 	
-	public synchronized boolean isPlayerStillPresent(Player player) {
+	public synchronized boolean isPresent(Player player) {
 		return players.contains(player);
 	}
 	
@@ -68,15 +68,15 @@ class Room implements Timed {
 	public synchronized void playerJoined(Player player) {
 		boolean startNewGame = false;
 		
-		players.add(player);
-		
 		switch (playerCount()) {
-		case 1: 
+		case 0: 
+			players.add(player);
 			player.sendMessage(new EmptyRoomMessage());
 			log.info("Player [{}] joined empty room [{}]", player.getName(), getName());
 			break;
 		
-		case 2:
+		case 1:
+			players.add(player);
 			sendMessageToAllBut(player, new PlayerJoinedMessage(player.getName()));
 			log.info("Player [{}] joined room [{}] containing one waiting player", player.getName(), getName());
 			startNewGame = true;
@@ -85,10 +85,12 @@ class Room implements Timed {
 		default:
 			sendMessageToAllBut(player, new PlayerJoinedMessage(player.getName()));
 			if (roomState == RoomState.ROUND_IN_PROGRESS) {
+				spectators.add(player);
 				player.sendMessage(new GameInProgressMessage());
 				log.info("Player [{}] joined room [{}] having an in-progress game", player.getName(), getName());
 			}
 			else {
+				players.add(player);
 				log.info("Player [{}] joined room [{}]", player.getName(), getName());
 			}
 			sendDrawings(player);
@@ -110,7 +112,7 @@ class Room implements Timed {
 	private PlayersMessage createPlayersMessage() {
 		PlayersMessage playersMsg = new PlayersMessage();
 		for (Player p : players) {
-			playersMsg.add(p.getName(), p.getScore(), p == currentlyDrawingPlayer);
+			p.populate(playersMsg, isCurrentlyDrawing(p));
 		}
 		return playersMsg;
 	}
@@ -127,7 +129,16 @@ class Room implements Timed {
 			roomState = RoomState.WAIT_FOR_PLAYERS;
 			sendMessage(new PlayerQuitMessage(player.getName()));
 			sendMessage(new EmptyRoomMessage());
-			log.info("Player [{}] quit room [{}] leaving one waiting player", player.getName(), getName());
+			
+			players.addAll(spectators);
+			spectators.clear();
+			
+			if (playerCount() == 1) {
+				log.info("Player [{}] quit room [{}] leaving one waiting player", player.getName(), getName());
+			} else {
+				log.info("Player [{}] quit room [{}] and there is nobody to finish this game, but there are other spectators so starting a new game", player.getName(), getName());
+				startNewGame();
+			}
 			break;
 		
 		default:
@@ -158,8 +169,12 @@ class Room implements Timed {
 		return players.size();
 	}
 	
+	@Override
 	public synchronized void sendMessage(Message message) {
 		for (Player p : players)
+			p.sendMessage(message);
+		
+		for (Player p : spectators)
 			p.sendMessage(message);
 	}
 	
@@ -167,26 +182,38 @@ class Room implements Timed {
 		for (Player p : players)
 			if (!p.equals(player))
 				p.sendMessage(message);
+		
+		for (Player p : spectators)
+			p.sendMessage(message);
 	}
 	
 	private synchronized void startNewGame() {
-		roundNumber = 0;
+		log.info("Starting a new game in room [{}]", getName());
 		
 		for (Player p : players) {
 			p.resetScore();
 		}
 		
+		players.addAll(spectators);
+		spectators.clear();
+		
+		playerSelector = new DefaultPlayerSelector(this, players);
+		
+		sendMessage(new NewGameMessage());
 		startNewRound();
 	}
 	
 	private synchronized void startNewRound() {
-		log.info("Starting a new game in room [{}]", getName());
-		
-		roundNumber = roundNumber + 1;
+		log.info("Starting a new round in room [{}]", getName());
 		
 		roomState = RoomState.ROUND_IN_PROGRESS;
 		ticks.set(0);
 		drawingsInRound.clear();
+		
+		if (!playerSelector.hasMorePlayers()) {
+			startNewGame();
+			return;
+		}
 		
 		selectNewWord();
 		selectNextPlayerToDraw();
@@ -201,11 +228,7 @@ class Room implements Timed {
 	}
 	
 	private void selectNextPlayerToDraw() {
-		if (nextPlayerToDrawIndex >= players.size()) {
-			nextPlayerToDrawIndex = 0;
-		}
-		
-		currentlyDrawingPlayer = players.get(nextPlayerToDrawIndex++);
+		currentlyDrawingPlayer = playerSelector.nextPlayer();
 		log.info("[{}] will draw next in room [{}]", currentlyDrawingPlayer.getName(), getName());
 	}
 	
@@ -245,13 +268,13 @@ class Room implements Timed {
 	private ScoresMessage createScoresMessage() {
 		ScoresMessage scoresMsg = new ScoresMessage();
 		for (Player p : players) {
-			scoresMsg.add(p.getName(), p.getScore());
+			p.populate(scoresMsg);
 		}
 		return scoresMsg;
 	}
 	
 	public boolean canGuess(Player player) {
-		return isRoundInProgress() && !isCurrentlyDrawing(player);
+		return isRoundInProgress() && !isSpectating(player) && !isCurrentlyDrawing(player);
 	}	
 	
 	public boolean canDraw(Player player) {
@@ -260,6 +283,10 @@ class Room implements Timed {
 	
 	private boolean isCurrentlyDrawing(Player player) {
 		return player.equals(currentlyDrawingPlayer);
+	}
+	
+	private boolean isSpectating(Player player) {
+		return spectators.contains(player);
 	}
 	
 }

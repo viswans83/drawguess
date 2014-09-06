@@ -4,8 +4,10 @@ import com.sankar.drawguess.msg.AwardMessage;
 import com.sankar.drawguess.msg.DrawingMessage;
 import com.sankar.drawguess.msg.GuessMessage;
 import com.sankar.drawguess.msg.Message;
+import com.sankar.drawguess.msg.PlayersMessage;
+import com.sankar.drawguess.msg.ScoresMessage;
 
-public class Player {
+public class Player implements EndPoint {
 	
 	private String name;
 	private int score;
@@ -22,10 +24,6 @@ public class Player {
 		return name;
 	}
 	
-	public int getScore() {
-		return score;
-	}
-	
 	public void award(int points) {
 		score = score + points;
 		sendMessage(new AwardMessage(points));
@@ -35,6 +33,7 @@ public class Player {
 		score = 0;
 	}
 	
+	@Override
 	public void sendMessage(Message message) {
 		ep.sendMessage(message);
 	}
@@ -59,6 +58,14 @@ public class Player {
 	
 	public void drew(DrawingMessage drawing) {
 		room.playerDrew(drawing);
+	}
+	
+	public void populate(ScoresMessage msg) {
+		msg.add(name, score);
+	}
+	
+	public void populate(PlayersMessage msg, boolean currentlyDrawing) {
+		msg.add(name, score, currentlyDrawing);
 	}
 	
 }
