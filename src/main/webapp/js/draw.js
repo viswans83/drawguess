@@ -76,9 +76,6 @@ function onload() {
 		if (msg.award) {
 			addMessage('You scored ' + msg.award + ' Points')
 		}
-		else if (msg.drawing) {
-			draw_points(msg.drawing)
-		}
 		else if (msg.emptyRoom) {
 			disableGuessing();
 			disableDrawing();
@@ -94,6 +91,9 @@ function onload() {
 		}
 		else if (msg.guess) {
 			addMessage(msg.who + ' guessed: ' + msg.guess)
+		}
+		else if (msg.lineDrawing) {
+			draw_points(msg.lineDrawing)
 		}
 		else if (msg.newRound) {
 			timeRemaining = 60
@@ -441,7 +441,7 @@ function onload() {
 	        })
 	        
 	        var r = minimize_points(points_acc)
-	        sock.send(JSON.stringify({drawing: r}))
+	        sock.send(JSON.stringify({lineDrawing: r}))
 	    }
 	}
 	

@@ -16,7 +16,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.google.inject.Inject;
 import com.sankar.drawguess.msg.DrawingMessage;
-import com.sankar.drawguess.msg.FloodFillMessage;
 import com.sankar.drawguess.msg.GuessMessage;
 import com.sankar.drawguess.msg.Message;
 
@@ -67,9 +66,6 @@ public class PlayerEndpoint {
 		
 		else if (isValidDrawing(message))
 			player.drew(message.asDrawing());
-		
-		else if (isValidFloodFill(message))
-			player.floodFilled(message.asFloodFill());
 	}	
 
 	private boolean isValidGuess(Message message) {
@@ -78,10 +74,6 @@ public class PlayerEndpoint {
 	
 	private boolean isValidDrawing(Message message) {
 		return message instanceof DrawingMessage && room.isRoundInProgress() && room.getCurrentlyDrawingPlayer().equals(player);
-	}
-	
-	private boolean isValidFloodFill(Message message) {
-		return message instanceof FloodFillMessage && room.isRoundInProgress() && room.getCurrentlyDrawingPlayer().equals(player);
 	}
 	
 	@OnError

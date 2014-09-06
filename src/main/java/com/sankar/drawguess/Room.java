@@ -9,7 +9,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.sankar.drawguess.msg.DrawingMessage;
 import com.sankar.drawguess.msg.EmptyRoomMessage;
-import com.sankar.drawguess.msg.FloodFillMessage;
 import com.sankar.drawguess.msg.GameInProgressMessage;
 import com.sankar.drawguess.msg.GuessMessage;
 import com.sankar.drawguess.msg.Message;
@@ -33,7 +32,7 @@ class Room implements Timed {
 	private volatile Player currentlyDrawingPlayer;
 	private String currentWord;
 	
-	private List<Message> drawingsInRound = new ArrayList<>();
+	private List<DrawingMessage> drawingsInRound = new ArrayList<>();
 	
 	private List<Player> players = new ArrayList<>();
 	private int nextPlayerToDrawIndex;
@@ -146,11 +145,6 @@ class Room implements Timed {
 	public synchronized void playerDrew(DrawingMessage drawing) {
 		drawingsInRound.add(drawing);
 		sendMessageToAllBut(currentlyDrawingPlayer, drawing);
-	}
-	
-	public void playerFloodFilled(FloodFillMessage floodFill) {
-		drawingsInRound.add(floodFill);
-		sendMessageToAllBut(currentlyDrawingPlayer, floodFill);
 	}
 	
 	public synchronized int playerCount() {

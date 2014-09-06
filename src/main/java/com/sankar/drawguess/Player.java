@@ -2,7 +2,6 @@ package com.sankar.drawguess;
 
 import com.sankar.drawguess.msg.AwardMessage;
 import com.sankar.drawguess.msg.DrawingMessage;
-import com.sankar.drawguess.msg.FloodFillMessage;
 import com.sankar.drawguess.msg.GuessMessage;
 import com.sankar.drawguess.msg.Message;
 
@@ -56,10 +55,6 @@ public class Player {
 	
 	public void drew(DrawingMessage drawing) {
 		room.playerDrew(drawing);
-	}
-	
-	public void floodFilled(FloodFillMessage floodFill) {
-		room.playerFloodFilled(floodFill);
 	}
 	
 }
