@@ -142,7 +142,6 @@ class Room implements Timed {
 	public synchronized void playerGuessed(GuessMessage message, Player player) {
 		if (message.getGuess().equalsIgnoreCase(currentWord)) {
 			log.info("Player [{}] guessed the word", player.getName());
-			message.setWhoGuessed(player);
 			sendMessageToAllBut(player, new WordGuessedMessage(player));
 			player.award(10);
 			currentlyDrawingPlayer.award(10);

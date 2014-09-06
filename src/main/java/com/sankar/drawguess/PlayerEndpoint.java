@@ -60,6 +60,7 @@ public class PlayerEndpoint {
 	public void onMessage(Message message) {
 		if (message.isGuess() && room.canGuess(player)) {
 			GuessMessage guess = message.asGuess();
+			guess.setWhoGuessed(player);
 			player.guessed(guess);
 		}
 		
