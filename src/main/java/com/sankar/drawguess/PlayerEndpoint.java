@@ -15,7 +15,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.google.inject.Inject;
-import com.sankar.drawguess.msg.DrawingMessage;
 import com.sankar.drawguess.msg.GuessMessage;
 import com.sankar.drawguess.msg.Message;
 
@@ -59,21 +58,13 @@ public class PlayerEndpoint {
 	
 	@OnMessage
 	public void onMessage(Message message) {
-		if (isValidGuess(message)) {
-			message.asGuess().setWhoGuessed(player);
-			player.guessed(message.asGuess());
+		if (message.isGuess() && room.canGuess(player)) {
+			GuessMessage guess = message.asGuess();
+			player.guessed(guess);
 		}
 		
-		else if (isValidDrawing(message))
+		else if (message.isDrawing() && room.canDraw(player))
 			player.drew(message.asDrawing());
-	}	
-
-	private boolean isValidGuess(Message message) {
-		return message instanceof GuessMessage && room.isRoundInProgress() && !room.getCurrentlyDrawingPlayer().equals(player) && message.asGuess().getGuess() != null;
-	}
-	
-	private boolean isValidDrawing(Message message) {
-		return message instanceof DrawingMessage && room.isRoundInProgress() && room.getCurrentlyDrawingPlayer().equals(player);
 	}
 	
 	@OnError

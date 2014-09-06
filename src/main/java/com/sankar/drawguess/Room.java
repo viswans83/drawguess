@@ -91,21 +91,28 @@ class Room implements Timed {
 			else {
 				log.info("Player [{}] joined room [{}]", player.getName(), getName());
 			}
-			for (Message drawing : drawingsInRound) {
-				player.sendMessage(drawing);
-			}
+			sendDrawings(player);
 		}
 		
-		PlayersMessage playersMsg = new PlayersMessage();
-		for (Player p : players) {
-			playersMsg.add(p.getName(), p.getScore(), p == currentlyDrawingPlayer);
-		}
-		
-		player.sendMessage(playersMsg);
+		player.sendMessage(createPlayersMessage());
 		
 		if (startNewGame) { 
 			startNewGame();
 		}
+	}
+
+	private void sendDrawings(Player player) {
+		for (Message drawing : drawingsInRound) {
+			player.sendMessage(drawing);
+		}
+	}
+
+	private PlayersMessage createPlayersMessage() {
+		PlayersMessage playersMsg = new PlayersMessage();
+		for (Player p : players) {
+			playersMsg.add(p.getName(), p.getScore(), p == currentlyDrawingPlayer);
+		}
+		return playersMsg;
 	}
 	
 	public synchronized void playerQuit(Player player) {
@@ -126,7 +133,7 @@ class Room implements Timed {
 		default:
 			sendMessage(new PlayerQuitMessage(player.getName()));
 			log.info("Player [{}] quit room [{}]", player.getName(), getName());
-			if (player.equals(currentlyDrawingPlayer)) {
+			if (isCurrentlyDrawing(player)) {
 				startNewRound();
 			}
 		}
@@ -135,6 +142,7 @@ class Room implements Timed {
 	public synchronized void playerGuessed(GuessMessage message, Player player) {
 		if (message.getGuess().equalsIgnoreCase(currentWord)) {
 			log.info("Player [{}] guessed the word", player.getName());
+			message.setWhoGuessed(player);
 			sendMessageToAllBut(player, new WordGuessedMessage(player));
 			player.award(10);
 			currentlyDrawingPlayer.award(10);
@@ -232,16 +240,31 @@ class Room implements Timed {
 		ticks.set(0);
 		
 		sendMessage(new RoundCompleteMessage(currentWord));
-		
+		sendMessage(createScoresMessage());
+	}
+
+	private ScoresMessage createScoresMessage() {
 		ScoresMessage scoresMsg = new ScoresMessage();
 		for (Player p : players) {
 			scoresMsg.add(p.getName(), p.getScore());
 		}
-		sendMessage(scoresMsg);
+		return scoresMsg;
+	}
+	
+	public boolean canGuess(Player player) {
+		return isRoundInProgress() && !isCurrentlyDrawing(player);
 	}	
+	
+	public boolean canDraw(Player player) {
+		return isRoundInProgress() && isCurrentlyDrawing(player);
+	}
+	
+	private boolean isCurrentlyDrawing(Player player) {
+		return player.equals(currentlyDrawingPlayer);
+	}
 	
 }
 
 enum RoomState {
-	ROUND_IN_PROGRESS, WAIT_BEFORE_NEW_ROUND, WAIT_FOR_PLAYERS
+	WAIT_FOR_PLAYERS, ROUND_IN_PROGRESS, WAIT_BEFORE_NEW_ROUND
 }
