@@ -3,9 +3,6 @@ package com.sankar.drawguess;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.sankar.drawguess.msg.DrawingMessage;
 import com.sankar.drawguess.msg.GameInProgressMessage;
 import com.sankar.drawguess.msg.GuessMessage;
@@ -15,8 +12,6 @@ import com.sankar.drawguess.msg.PlayerJoinedMessage;
 import com.sankar.drawguess.msg.PlayerQuitMessage;
 
 class Room implements IRoom {
-	
-	private static Logger log = LogManager.getLogger();
 	
 	private String name;
 	private Timer timer;
