@@ -1,5 +1,8 @@
 package com.sankar.drawguess;
 
+import com.sankar.drawguess.api.IEndPoint;
+import com.sankar.drawguess.api.IPlayer;
+import com.sankar.drawguess.api.IRoom;
 import com.sankar.drawguess.msg.DrawingMessage;
 import com.sankar.drawguess.msg.GuessMessage;
 import com.sankar.drawguess.msg.Message;
@@ -9,9 +12,9 @@ public class Player implements IPlayer {
 	private String name;
 	private IRoom room;
 	
-	private EndPoint ep;
+	private IEndPoint ep;
 	
-	public Player(String name, EndPoint ep) {
+	public Player(String name, IEndPoint ep) {
 		this.name = name;
 		this.ep = ep;
 	}

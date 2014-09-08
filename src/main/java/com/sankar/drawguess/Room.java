@@ -3,6 +3,9 @@ package com.sankar.drawguess;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sankar.drawguess.api.IGame;
+import com.sankar.drawguess.api.IPlayer;
+import com.sankar.drawguess.api.IRoom;
 import com.sankar.drawguess.msg.DrawingMessage;
 import com.sankar.drawguess.msg.GameInProgressMessage;
 import com.sankar.drawguess.msg.GuessMessage;

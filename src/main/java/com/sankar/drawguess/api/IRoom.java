@@ -1,10 +1,10 @@
-package com.sankar.drawguess;
+package com.sankar.drawguess.api;
 
 import com.sankar.drawguess.msg.DrawingMessage;
 import com.sankar.drawguess.msg.GuessMessage;
 import com.sankar.drawguess.msg.Message;
 
-interface IRoom extends EndPoint {
+public interface IRoom extends IEndPoint {
 
 	public static final int MIN_PLAYERS_PER_GAME = 3;
 

@@ -3,7 +3,11 @@ package com.sankar.drawguess;
 import java.util.ArrayList;
 import java.util.List;
 
-class DefaultPlayerSelector implements PlayerSelector {
+import com.sankar.drawguess.api.IPlayer;
+import com.sankar.drawguess.api.IPlayerSelector;
+import com.sankar.drawguess.api.IRoom;
+
+class DefaultPlayerSelector implements IPlayerSelector {
 	
 	private IRoom room;
 	private List<IPlayer> players;

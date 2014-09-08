@@ -15,6 +15,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.google.inject.Inject;
+import com.sankar.drawguess.api.IEndPoint;
+import com.sankar.drawguess.api.IPlayer;
+import com.sankar.drawguess.api.IRoom;
 import com.sankar.drawguess.msg.Message;
 
 @ServerEndpoint(
@@ -42,7 +45,7 @@ public class PlayerEndpoint {
 	public void onOpen(Session session, @PathParam("room") String roomName, @PathParam("player") String playerName) {
 		session.setMaxIdleTimeout(120 * 1000);
 		
-		EndPoint playerEndpoint = createPlayerEndPoint(session, roomName, playerName);
+		IEndPoint playerEndpoint = createPlayerEndPoint(session, roomName, playerName);
 		
 		rooms.putIfAbsent(roomName, new Room(roomName, timer));
 		

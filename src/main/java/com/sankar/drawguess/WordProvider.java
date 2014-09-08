@@ -3,7 +3,9 @@ package com.sankar.drawguess;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WordProvider {
+import com.sankar.drawguess.api.IWordProvider;
+
+public class WordProvider implements IWordProvider {
 	
 	private List<String> dictionary = new ArrayList<String>();
 	
@@ -64,6 +66,7 @@ public class WordProvider {
 		dictionary.add("Blinking");
 	}
 	
+	@Override
 	public String nextWord() {
 		if (nextWordIndex == dictionary.size())
 			nextWordIndex = 0;

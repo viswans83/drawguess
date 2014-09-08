@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.sankar.drawguess.api.IEndPoint;
+import com.sankar.drawguess.api.IPlayer;
 import com.sankar.drawguess.msg.ScoresMessage;
 
 public class Scores {
@@ -20,7 +22,7 @@ public class Scores {
 		scores.put(player, scores.get(player) + points);
 	}
 	
-	public void transmit(EndPoint endPoint) {
+	public void transmit(IEndPoint endPoint) {
 		endPoint.sendMessage(buildMessage());
 	}
 	

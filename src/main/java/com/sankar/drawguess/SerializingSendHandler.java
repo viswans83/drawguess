@@ -12,9 +12,10 @@ import javax.websocket.Session;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.sankar.drawguess.api.IEndPoint;
 import com.sankar.drawguess.msg.Message;
 
-public class SerializingSendHandler implements EndPoint {
+public class SerializingSendHandler implements IEndPoint {
 	
 	private static Logger log = LogManager.getLogger();
 	

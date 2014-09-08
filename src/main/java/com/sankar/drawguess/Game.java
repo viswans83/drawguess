@@ -3,6 +3,12 @@ package com.sankar.drawguess;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.sankar.drawguess.api.IGame;
+import com.sankar.drawguess.api.IPlayer;
+import com.sankar.drawguess.api.IPlayerSelector;
+import com.sankar.drawguess.api.IRoom;
+import com.sankar.drawguess.api.IRound;
+import com.sankar.drawguess.api.IWordProvider;
 import com.sankar.drawguess.msg.AwardMessage;
 import com.sankar.drawguess.msg.DrawingMessage;
 import com.sankar.drawguess.msg.GuessMessage;
@@ -16,8 +22,8 @@ public class Game implements IGame {
 	private Timer timer;
 	
 	private Scores scores;
-	private WordProvider wordProvider;
-	private PlayerSelector playerSelector;
+	private IWordProvider wordProvider;
+	private IPlayerSelector playerSelector;
 	
 	private IRound round;
 	

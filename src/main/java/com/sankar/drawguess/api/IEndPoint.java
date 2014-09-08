@@ -1,7 +1,7 @@
-package com.sankar.drawguess;
+package com.sankar.drawguess.api;
 
 import com.sankar.drawguess.msg.Message;
 
-public interface EndPoint {
+public interface IEndPoint {
 	void sendMessage(Message message);
 }

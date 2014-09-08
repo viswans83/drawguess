@@ -5,6 +5,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.sankar.drawguess.api.IGame;
+import com.sankar.drawguess.api.IPlayer;
+import com.sankar.drawguess.api.IRound;
+import com.sankar.drawguess.api.ITimed;
 import com.sankar.drawguess.msg.DrawingMessage;
 import com.sankar.drawguess.msg.GuessMessage;
 import com.sankar.drawguess.msg.NewRoundMessage;
@@ -26,7 +30,7 @@ public class Round implements IRound {
 	private Set<IPlayer> playersWhoGuessedCorrectly = new HashSet<>();
 	private List<DrawingMessage> drawings = new ArrayList<>();
 	
-	private Timed roundTimer;
+	private ITimed roundTimer;
 	
 	public Round(String word, IPlayer pictorist, IGame game, Timer timer) {
 		this.word = word;
@@ -137,8 +141,8 @@ public class Round implements IRound {
 		game.sendMessage(new TickMessage(timeRemaining));
 	}
 	
-	private Timed createRoundTimer() {
-		roundTimer = new Timed() {
+	private ITimed createRoundTimer() {
+		roundTimer = new ITimed() {
 			
 			int timeRemaining = TICKS_PER_ROUND;
 

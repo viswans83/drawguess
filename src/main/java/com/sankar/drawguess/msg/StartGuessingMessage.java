@@ -1,6 +1,6 @@
 package com.sankar.drawguess.msg;
 
-import com.sankar.drawguess.IPlayer;
+import com.sankar.drawguess.api.IPlayer;
 
 public class StartGuessingMessage extends Message {
 	@SuppressWarnings("unused")

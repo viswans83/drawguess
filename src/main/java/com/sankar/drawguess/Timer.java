@@ -4,20 +4,22 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.sankar.drawguess.api.ITimed;
+
 public class Timer extends Thread {
 
-	private Set<Timed> interested = Collections.synchronizedSet(new HashSet<Timed>());
+	private Set<ITimed> interested = Collections.synchronizedSet(new HashSet<ITimed>());
 	
 	public Timer() {
 		setName("Game Timer");
 		setDaemon(true);
 	}
 	
-	public void registerInterest(Timed timed) {
+	public void registerInterest(ITimed timed) {
 		interested.add(timed);
 	}
 	
-	public void unregisterInterest(Timed timed) {
+	public void unregisterInterest(ITimed timed) {
 		interested.remove(timed);
 	}
 	
@@ -31,7 +33,7 @@ public class Timer extends Thread {
 			try {
 				Thread.sleep(1000);
 				synchronized(interested) {
-					for (Timed t : interested) {
+					for (ITimed t : interested) {
 						t.tick();
 					}
 				}
@@ -45,7 +47,7 @@ public class Timer extends Thread {
 		void run();
 	}
 	
-	public class Delay implements Timed {
+	public class Delay implements ITimed {
 		
 		private int ticksRemaining;
 		private Action task;

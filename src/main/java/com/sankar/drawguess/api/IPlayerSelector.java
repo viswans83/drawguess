@@ -1,6 +1,6 @@
-package com.sankar.drawguess;
+package com.sankar.drawguess.api;
 
-interface PlayerSelector {
+public interface IPlayerSelector {
 	
 	boolean hasMorePlayers();
 	
