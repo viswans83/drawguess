@@ -5,13 +5,13 @@ import java.util.List;
 
 import com.sankar.drawguess.api.IWordProvider;
 
-public class WordProvider implements IWordProvider {
+public class DefaultWordProvider implements IWordProvider {
 	
 	private List<String> dictionary = new ArrayList<String>();
 	
 	private int nextWordIndex;
 	
-	public WordProvider() {
+	public DefaultWordProvider() {
 		nextWordIndex = 0;
 		
 		dictionary.add("Chicken");

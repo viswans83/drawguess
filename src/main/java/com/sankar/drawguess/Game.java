@@ -34,7 +34,7 @@ public class Game implements IGame {
 		this.timer = timer;
 		
 		this.scores = new Scores(playersThisInstant);
-		this.wordProvider = new WordProvider();
+		this.wordProvider = new DefaultWordProvider();
 		this.playerSelector = new DefaultPlayerSelector(room, playersThisInstant);
 	}
 	
