@@ -78,6 +78,15 @@ public class Round implements IRound {
 			player.sendMessage(drawing);
 	}
 	
+	@Override
+	public void cancel() {
+		if (roundTimer == null)
+			throw new IllegalStateException();
+		
+		game.sendMessage(new RoundCompleteMessage(word));
+		timer.unregisterInterest(roundTimer);
+	}
+	
 	private void sendInitialMessages() {
 		game.sendMessage(new NewRoundMessage());
 		pictorist.sendMessage(new NewWordMessage(word));
@@ -150,6 +159,6 @@ public class Round implements IRound {
 		};
 		
 		return roundTimer;
-	}	
+	}		
 
 }

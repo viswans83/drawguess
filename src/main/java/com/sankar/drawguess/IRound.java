@@ -15,4 +15,6 @@ public interface IRound {
 
 	void playerQuit(IPlayer player);
 
+	void cancel();
+
 }

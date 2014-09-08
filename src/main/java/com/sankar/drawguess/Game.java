@@ -53,8 +53,10 @@ public class Game implements IGame {
 	public void playerQuit(IPlayer player) {
 		players.remove(player);
 		
-		if (players.size() < 2)
+		if (players.size() < 2) {
+			round.cancel();
 			room.gameOver();
+		}
 		
 		else if (round != null)
 			round.playerQuit(player);
