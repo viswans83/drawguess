@@ -3,12 +3,16 @@ package com.sankar.drawguess;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.sankar.drawguess.api.IGame;
 import com.sankar.drawguess.api.IPlayer;
 import com.sankar.drawguess.api.IRoom;
 import com.sankar.drawguess.api.ITimer;
 import com.sankar.drawguess.msg.DrawingMessage;
 import com.sankar.drawguess.msg.GameInProgressMessage;
+import com.sankar.drawguess.msg.GameOverMessage;
 import com.sankar.drawguess.msg.GuessMessage;
 import com.sankar.drawguess.msg.InsufficientPlayersMessage;
 import com.sankar.drawguess.msg.Message;
@@ -16,6 +20,8 @@ import com.sankar.drawguess.msg.PlayerJoinedMessage;
 import com.sankar.drawguess.msg.PlayerQuitMessage;
 
 class Room implements IRoom {
+	
+	private static Logger log = LogManager.getLogger();
 	
 	private String name;
 	private ITimer timer;
@@ -38,6 +44,7 @@ class Room implements IRoom {
 	public synchronized void playerJoined(IPlayer player) {
 		players.add(player);
 		
+		log.info("Player [{}] joined room [{}]", player.getName(), getName());
 		sendMessage(new PlayerJoinedMessage(player.getName()));
 		
 		if (game == null)
@@ -54,6 +61,7 @@ class Room implements IRoom {
 	public synchronized void playerQuit(IPlayer player) {
 		players.remove(player);
 		
+		log.info("Player [{}] quit room [{}]", player.getName(), getName());
 		sendMessage(new PlayerQuitMessage(player.getName()));
 		
 		if (game != null)
@@ -88,6 +96,7 @@ class Room implements IRoom {
 	}
 	
 	private synchronized void startNewGame() {
+		log.info("Starting a new game in room [{}]", getName());
 		game = new Game(players, this, timer);
 		game.start();
 	}
@@ -95,6 +104,9 @@ class Room implements IRoom {
 	@Override
 	public synchronized void gameOver() {
 		game = null;
+		
+		log.info("A game completed in room [{}]", getName());
+		sendMessage(new GameOverMessage());
 		
 		if (players.size() >= MIN_PLAYERS_PER_GAME)
 			startNewGame();

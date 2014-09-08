@@ -85,6 +85,9 @@ function onload() {
 			disableDrawing();
 			addMessage('Game is in progress, spectating until next round..')
 		}
+		else if (msg.gameOver) {
+			addMessage('*** Game over ***')
+		}
 		else if (msg.guess) {
 			addMessage(msg.who + ' guessed: ' + msg.guess)
 		}
@@ -101,11 +104,7 @@ function onload() {
 		}
 		else if (msg.newRound) {
 			addMessage('New round Starting')
-			
 			clearCanvas()
-			
-			disableDrawing()
-			disableGuessing()
 		}
 		else if (msg.newWord) {
 			clearCanvas()
@@ -121,6 +120,8 @@ function onload() {
 		}
 		else if (msg.roundComplete) {
 			addMessage('Round complete, the word was: ' + msg.originalWord)
+			disableDrawing()
+			disableGuessing()
 		}
 		else if (msg.scores) {
 			str = 'Current Scores: '

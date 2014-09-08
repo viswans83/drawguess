@@ -3,6 +3,9 @@ package com.sankar.drawguess;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.sankar.drawguess.api.IGame;
 import com.sankar.drawguess.api.IPlayer;
 import com.sankar.drawguess.api.IPlayerSelector;
@@ -18,6 +21,8 @@ import com.sankar.drawguess.msg.Message;
 import com.sankar.drawguess.msg.NewGameMessage;
 
 public class Game implements IGame {
+	
+	private static Logger log = LogManager.getLogger();
 	
 	private List<IPlayer> players = new ArrayList<>();
 	private IRoom room;
@@ -88,6 +93,8 @@ public class Game implements IGame {
 	
 	@Override
 	public void roundComplete() {
+		log.info("The current round in room [{}] has completed", room.getName());
+		
 		if (playerSelector.hasMorePlayers()) {
 			String word = wordProvider.nextWord();
 			IPlayer nextPlayer = playerSelector.nextPlayer();
@@ -116,6 +123,7 @@ public class Game implements IGame {
 	}
 	
 	private void startNewRound(String word, IPlayer player) {
+		log.info("Starting a new round in room [{}]", room.getName());
 		scores.transmit(room);
 		
 		round = new Round(word, player, this, timer);

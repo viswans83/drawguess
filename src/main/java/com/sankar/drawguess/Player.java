@@ -49,6 +49,7 @@ public class Player implements IPlayer {
 	public void guessed(GuessMessage guess) {
 		if (room == null) throw new IllegalStateException();
 		
+		guess.setWhoGuessed(this);
 		room.playerGuessed(guess, this);
 	}
 	

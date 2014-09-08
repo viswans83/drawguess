@@ -48,12 +48,17 @@ public class PlayerEndpoint {
 		
 		IEndPoint playerEndpoint = createPlayerEndPoint(session, roomName, playerName);
 		
-		rooms.putIfAbsent(roomName, new Room(roomName, timer));
+		rooms.putIfAbsent(roomName, createNewRoom(roomName));
 		
 		this.player = new Player(playerName, playerEndpoint);
 		this.room = rooms.get(roomName);
 		
 		player.joinRoom(room);
+	}
+
+	private Room createNewRoom(String roomName) {
+		log.info("Creating new room named [{}]", roomName);
+		return new Room(roomName, timer);
 	}	
 	
 	@OnMessage
