@@ -8,6 +8,7 @@ import com.sankar.drawguess.api.IPlayer;
 import com.sankar.drawguess.api.IPlayerSelector;
 import com.sankar.drawguess.api.IRoom;
 import com.sankar.drawguess.api.IRound;
+import com.sankar.drawguess.api.IScores;
 import com.sankar.drawguess.api.ITimer;
 import com.sankar.drawguess.api.IWordProvider;
 import com.sankar.drawguess.msg.AwardMessage;
@@ -22,7 +23,7 @@ public class Game implements IGame {
 	private IRoom room;
 	private ITimer timer;
 	
-	private Scores scores;
+	private IScores scores;
 	private IWordProvider wordProvider;
 	private IPlayerSelector playerSelector;
 	

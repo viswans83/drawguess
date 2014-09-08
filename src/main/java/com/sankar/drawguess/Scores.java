@@ -6,9 +6,10 @@ import java.util.Map;
 
 import com.sankar.drawguess.api.IEndPoint;
 import com.sankar.drawguess.api.IPlayer;
+import com.sankar.drawguess.api.IScores;
 import com.sankar.drawguess.msg.ScoresMessage;
 
-public class Scores {
+public class Scores implements IScores {
 	
 	private Map<IPlayer, Integer> scores = new LinkedHashMap<>();
 	
@@ -18,10 +19,12 @@ public class Scores {
 		}
 	}
 	
+	@Override
 	public void award(IPlayer player, int points) {
 		scores.put(player, scores.get(player) + points);
 	}
 	
+	@Override
 	public void transmit(IEndPoint endPoint) {
 		endPoint.sendMessage(buildMessage());
 	}
