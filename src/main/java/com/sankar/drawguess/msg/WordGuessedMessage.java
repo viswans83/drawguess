@@ -1,6 +1,6 @@
 package com.sankar.drawguess.msg;
 
-import com.sankar.drawguess.Player;
+import com.sankar.drawguess.IPlayer;
 
 public class WordGuessedMessage extends Message {
 	
@@ -10,7 +10,7 @@ public class WordGuessedMessage extends Message {
 	@SuppressWarnings("unused")
 	private boolean wordGuessed = true;
 	
-	public WordGuessedMessage(Player who) {
+	public WordGuessedMessage(IPlayer who) {
 		this.who = who.getName();
 	}
 	

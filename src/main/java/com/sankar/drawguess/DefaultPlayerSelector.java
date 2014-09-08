@@ -5,13 +5,13 @@ import java.util.List;
 
 class DefaultPlayerSelector implements PlayerSelector {
 	
-	private Room room;
-	private List<Player> players;
+	private IRoom room;
+	private List<IPlayer> players;
 	
 	private int nextPlayerIndex = 0;
 	private boolean noMorePlayers;
 	
-	public DefaultPlayerSelector(Room room, List<Player> players) {
+	public DefaultPlayerSelector(IRoom room, List<IPlayer> players) {
 		this.room = room;
 		this.players = new ArrayList<>(players);
 	}
@@ -24,7 +24,7 @@ class DefaultPlayerSelector implements PlayerSelector {
 	}
 	
 	@Override
-	public Player nextPlayer() {
+	public IPlayer nextPlayer() {
 		calculateNextPlayerIndex();
 		
 		if (noMorePlayers)
@@ -40,7 +40,7 @@ class DefaultPlayerSelector implements PlayerSelector {
 	}
 	
 	private void calculateNextPlayerIndex() {
-		Player player;
+		IPlayer player;
 		
 		if (noMorePlayers) return;
 		

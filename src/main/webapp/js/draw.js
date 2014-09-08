@@ -11,8 +11,6 @@ function onload() {
 	var wsurl = document.getElementById('wsurl')
 	var sock = new WebSocket('ws://' + wsurl.host + wsurl.pathname + '/' + room + '/' + name)
 	
-	var timeRemaining = 60;
-	
 	var drawingEnabled = false;
 	var guessingEnabled = false;
 	
@@ -79,11 +77,6 @@ function onload() {
 		if (msg.award) {
 			addMessage('You scored ' + msg.award + ' Points')
 		}
-		else if (msg.emptyRoom) {
-			disableGuessing();
-			disableDrawing();
-			addMessage('Room is empty, waiting for players to join..')
-		}
 		else if (msg.floodFill) {
 			floodFill(msg.floodFill, msg.color)
 		}
@@ -95,6 +88,11 @@ function onload() {
 		else if (msg.guess) {
 			addMessage(msg.who + ' guessed: ' + msg.guess)
 		}
+		else if (msg.insufficientPlayers) {
+			disableGuessing();
+			disableDrawing();
+			addMessage('Waiting for additional players..')
+		}
 		else if (msg.lineDrawing) {
 			draw_points(msg.lineDrawing)
 		}
@@ -102,8 +100,7 @@ function onload() {
 			addMessage('*** New game Starting ***')
 		}
 		else if (msg.newRound) {
-			timeRemaining = 60
-			addMessage('New round Starting, you have 60 seconds')
+			addMessage('New round Starting')
 			
 			clearCanvas()
 			
@@ -121,16 +118,6 @@ function onload() {
 		}
 		else if (msg.playerQuit) {
 			addMessage('Player quit: ' + msg.playerQuit)
-		}
-		else if (msg.players) {
-			str = 'Players in room: '
-			
-			msg.players.forEach(function(v) {
-				str = str + v.name + '(' + v.score + '), '
-			})
-			str = str.slice(0, str.length - (msg.players.length == 0 ? 0 : 2))
-			
-			addMessage(str)
 		}
 		else if (msg.roundComplete) {
 			addMessage('Round complete, the word was: ' + msg.originalWord)
@@ -150,12 +137,7 @@ function onload() {
 			addMessage(msg.who + ' is now drawing, start guessing!')
 		}
 		else if (msg.ticks) {
-			timeRemaining = 60 - msg.ticks
-			
-			if (timeRemaining > 0)
-				addMessage(timeRemaining + ' seconds left in this round')
-			else
-				addMessage('Time up!')
+			addMessage(msg.ticks + ' seconds left in this round')
 		}
 		else if (msg.wordGuessed) {
 			addMessage(msg.who + ' has guessed correctly')

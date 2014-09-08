@@ -4,7 +4,7 @@ interface PlayerSelector {
 	
 	boolean hasMorePlayers();
 	
-	Player nextPlayer();
+	IPlayer nextPlayer();
 	
 	void rewind();
 	

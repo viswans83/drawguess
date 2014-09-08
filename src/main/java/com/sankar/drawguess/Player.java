@@ -4,10 +4,10 @@ import com.sankar.drawguess.msg.DrawingMessage;
 import com.sankar.drawguess.msg.GuessMessage;
 import com.sankar.drawguess.msg.Message;
 
-public class Player implements EndPoint {
+public class Player implements IPlayer {
 	
 	private String name;
-	private Room room;
+	private IRoom room;
 	
 	private EndPoint ep;
 	
@@ -16,6 +16,7 @@ public class Player implements EndPoint {
 		this.ep = ep;
 	}
 	
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -25,13 +26,15 @@ public class Player implements EndPoint {
 		ep.sendMessage(message);
 	}
 	
-	public void joinRoom(Room room) {
+	@Override
+	public void joinRoom(IRoom room) {
 		if (this.room != null) throw new IllegalStateException();
 			
 		this.room = room;
 		room.playerJoined(this);
 	}
 	
+	@Override
 	public void leaveCurrentRoom() {
 		if (room == null) throw new IllegalStateException();
 		
@@ -39,16 +42,18 @@ public class Player implements EndPoint {
 		room = null;
 	}
 	
+	@Override
 	public void guessed(GuessMessage guess) {
 		if (room == null) throw new IllegalStateException();
 		
 		room.playerGuessed(guess, this);
 	}
 	
+	@Override
 	public void drew(DrawingMessage drawing) {
 		if (room == null) throw new IllegalStateException();
 		
-		room.playerDrew(drawing);
+		room.playerDrew(drawing, this);
 	}
 	
 }

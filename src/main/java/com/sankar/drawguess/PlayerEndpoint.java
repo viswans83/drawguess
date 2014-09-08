@@ -15,7 +15,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.google.inject.Inject;
-import com.sankar.drawguess.msg.GuessMessage;
 import com.sankar.drawguess.msg.Message;
 
 @ServerEndpoint(
@@ -27,10 +26,10 @@ public class PlayerEndpoint {
 	
 	private static Logger log = LogManager.getLogger();
 	 
-	private static ConcurrentMap<String, Room> rooms = new ConcurrentHashMap<>();
+	private static ConcurrentMap<String, IRoom> rooms = new ConcurrentHashMap<>();
 	
-	private Player player;
-	private Room room;
+	private IPlayer player;
+	private IRoom room;
 	
 	private Timer timer;
 	
@@ -43,28 +42,22 @@ public class PlayerEndpoint {
 	public void onOpen(Session session, @PathParam("room") String roomName, @PathParam("player") String playerName) {
 		session.setMaxIdleTimeout(120 * 1000);
 		
-		SerializingSendHandler sendHandler = new SerializingSendHandler(session, playerName, roomName);
-		WordProvider wordProvider = new WordProvider();
+		EndPoint playerEndpoint = createPlayerEndPoint(session, roomName, playerName);
 		
-		if (rooms.putIfAbsent(roomName, new Room(roomName, wordProvider)) == null) {
-			timer.registerInterest(rooms.get(roomName));
-		}
+		rooms.putIfAbsent(roomName, new Room(roomName, timer));
 		
-		this.player = new Player(playerName, sendHandler);
+		this.player = new Player(playerName, playerEndpoint);
 		this.room = rooms.get(roomName);
 		
 		player.joinRoom(room);
-	}
+	}	
 	
 	@OnMessage
 	public void onMessage(Message message) {
-		if (message.isGuess() && room.canGuess(player)) {
-			GuessMessage guess = message.asGuess();
-			guess.setWhoGuessed(player);
-			player.guessed(guess);
-		}
+		if (message.isGuess())
+			player.guessed(message.asGuess());
 		
-		else if (message.isDrawing() && room.canDraw(player))
+		else if (message.isDrawing())
 			player.drew(message.asDrawing());
 	}
 	
@@ -76,6 +69,10 @@ public class PlayerEndpoint {
 	@OnClose
 	public void onClose() {
 		player.leaveCurrentRoom();
+	}
+	
+	private SerializingSendHandler createPlayerEndPoint(Session session, String roomName, String playerName) {
+		return new SerializingSendHandler(session, playerName, roomName);
 	}
 	
 }

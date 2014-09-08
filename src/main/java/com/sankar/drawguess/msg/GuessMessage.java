@@ -1,6 +1,6 @@
 package com.sankar.drawguess.msg;
 
-import com.sankar.drawguess.Player;
+import com.sankar.drawguess.IPlayer;
 
 public class GuessMessage extends Message {
 	
@@ -8,7 +8,7 @@ public class GuessMessage extends Message {
 	private String who;
 	private String guess;
 	
-	public void setWhoGuessed(Player who) {
+	public void setWhoGuessed(IPlayer who) {
 		this.who = who.getName();
 	}
 	

@@ -8,15 +8,15 @@ import com.sankar.drawguess.msg.ScoresMessage;
 
 public class Scores {
 	
-	private Map<Player, Integer> scores = new LinkedHashMap<>();
+	private Map<IPlayer, Integer> scores = new LinkedHashMap<>();
 	
-	public Scores(Collection<Player> players) {
-		for (Player p : players) {
+	public Scores(Collection<IPlayer> players) {
+		for (IPlayer p : players) {
 			scores.put(p, 0);
 		}
 	}
 	
-	public void award(Player player, int points) {
+	public void award(IPlayer player, int points) {
 		scores.put(player, scores.get(player) + points);
 	}
 	
@@ -26,7 +26,7 @@ public class Scores {
 	
 	private ScoresMessage buildMessage() {
 		ScoresMessage scoresMsg = new ScoresMessage();
-		for (Player p : scores.keySet()) {
+		for (IPlayer p : scores.keySet()) {
 			scoresMsg.add(p.getName(), scores.get(p));
 		}
 		return scoresMsg;
