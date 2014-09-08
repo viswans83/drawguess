@@ -68,6 +68,7 @@ public class Game implements IGame {
 		
 		if (players.size() < 2) {
 			round.cancel();
+			scores.transmit(room);
 			room.gameOver();
 		}
 		
