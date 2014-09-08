@@ -5,6 +5,7 @@ import javax.websocket.server.ServerEndpointConfig.Configurator;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.sankar.drawguess.api.ITimer;
 
 public class GuiceEndpointConfigurator extends Configurator {
 	
@@ -15,7 +16,7 @@ public class GuiceEndpointConfigurator extends Configurator {
 			timer.start();
 			
 			bind(PlayerEndpoint.class);
-			bind(Timer.class).toInstance(timer);
+			bind(ITimer.class).toInstance(timer);
 		}
 	});
 	
