@@ -6,6 +6,7 @@ import java.util.List;
 import com.sankar.drawguess.api.IGame;
 import com.sankar.drawguess.api.IPlayer;
 import com.sankar.drawguess.api.IRoom;
+import com.sankar.drawguess.api.ITimer;
 import com.sankar.drawguess.msg.DrawingMessage;
 import com.sankar.drawguess.msg.GameInProgressMessage;
 import com.sankar.drawguess.msg.GuessMessage;
@@ -17,13 +18,13 @@ import com.sankar.drawguess.msg.PlayerQuitMessage;
 class Room implements IRoom {
 	
 	private String name;
-	private Timer timer;
+	private ITimer timer;
 	
 	private List<IPlayer> players = new ArrayList<>();
 	
 	private IGame game;
 	
-	public Room(String name, Timer timer) {
+	public Room(String name, ITimer timer) {
 		this.name = name;
 		this.timer = timer;
 	}

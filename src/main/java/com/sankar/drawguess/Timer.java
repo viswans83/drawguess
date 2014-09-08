@@ -5,8 +5,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.sankar.drawguess.api.ITimed;
+import com.sankar.drawguess.api.ITimer;
 
-public class Timer extends Thread {
+public class Timer extends Thread implements ITimer {
 
 	private Set<ITimed> interested = Collections.synchronizedSet(new HashSet<ITimed>());
 	
@@ -15,14 +16,17 @@ public class Timer extends Thread {
 		setDaemon(true);
 	}
 	
+	@Override
 	public void registerInterest(ITimed timed) {
 		interested.add(timed);
 	}
 	
+	@Override
 	public void unregisterInterest(ITimed timed) {
 		interested.remove(timed);
 	}
 	
+	@Override
 	public void schedule(int ticks, Action task) {
 		new Delay(ticks, task).start();
 	}

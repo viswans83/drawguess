@@ -18,6 +18,7 @@ import com.google.inject.Inject;
 import com.sankar.drawguess.api.IEndPoint;
 import com.sankar.drawguess.api.IPlayer;
 import com.sankar.drawguess.api.IRoom;
+import com.sankar.drawguess.api.ITimer;
 import com.sankar.drawguess.msg.Message;
 
 @ServerEndpoint(
@@ -34,10 +35,10 @@ public class PlayerEndpoint {
 	private IPlayer player;
 	private IRoom room;
 	
-	private Timer timer;
+	private ITimer timer;
 	
 	@Inject
-	public PlayerEndpoint(Timer timer) {
+	public PlayerEndpoint(ITimer timer) {
 		this.timer = timer;
 	}
 	

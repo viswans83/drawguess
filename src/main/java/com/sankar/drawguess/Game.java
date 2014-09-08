@@ -8,6 +8,7 @@ import com.sankar.drawguess.api.IPlayer;
 import com.sankar.drawguess.api.IPlayerSelector;
 import com.sankar.drawguess.api.IRoom;
 import com.sankar.drawguess.api.IRound;
+import com.sankar.drawguess.api.ITimer;
 import com.sankar.drawguess.api.IWordProvider;
 import com.sankar.drawguess.msg.AwardMessage;
 import com.sankar.drawguess.msg.DrawingMessage;
@@ -19,7 +20,7 @@ public class Game implements IGame {
 	
 	private List<IPlayer> players = new ArrayList<>();
 	private IRoom room;
-	private Timer timer;
+	private ITimer timer;
 	
 	private Scores scores;
 	private IWordProvider wordProvider;
@@ -27,7 +28,7 @@ public class Game implements IGame {
 	
 	private IRound round;
 	
-	public Game(List<IPlayer> playersThisInstant, IRoom room, Timer timer) {
+	public Game(List<IPlayer> playersThisInstant, IRoom room, ITimer timer) {
 		this.players = new ArrayList<>(playersThisInstant);
 		this.room = room;
 		this.timer = timer;

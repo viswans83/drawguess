@@ -9,6 +9,7 @@ import com.sankar.drawguess.api.IGame;
 import com.sankar.drawguess.api.IPlayer;
 import com.sankar.drawguess.api.IRound;
 import com.sankar.drawguess.api.ITimed;
+import com.sankar.drawguess.api.ITimer;
 import com.sankar.drawguess.msg.DrawingMessage;
 import com.sankar.drawguess.msg.GuessMessage;
 import com.sankar.drawguess.msg.NewRoundMessage;
@@ -25,14 +26,14 @@ public class Round implements IRound {
 	private String word;
 	private IPlayer pictorist;
 	private IGame game;
-	private Timer timer;
+	private ITimer timer;
 	
 	private Set<IPlayer> playersWhoGuessedCorrectly = new HashSet<>();
 	private List<DrawingMessage> drawings = new ArrayList<>();
 	
 	private ITimed roundTimer;
 	
-	public Round(String word, IPlayer pictorist, IGame game, Timer timer) {
+	public Round(String word, IPlayer pictorist, IGame game, ITimer timer) {
 		this.word = word;
 		this.pictorist = pictorist;
 		this.game = game;
