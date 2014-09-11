@@ -13,6 +13,7 @@ import com.sankar.drawguess.msg.DrawingMessage;
 import com.sankar.drawguess.msg.GuessMessage;
 import com.sankar.drawguess.msg.NewRoundMessage;
 import com.sankar.drawguess.msg.NewWordMessage;
+import com.sankar.drawguess.msg.RoundCancelledMessage;
 import com.sankar.drawguess.msg.RoundCompleteMessage;
 import com.sankar.drawguess.msg.StartGuessingMessage;
 import com.sankar.drawguess.msg.TickMessage;
@@ -86,11 +87,13 @@ public class Round implements IRound {
 	
 	@Override
 	public void cancel() {
-		if (state != RoundState.STARTED)
+		if (state == RoundState.CANCELLED)
 			throw new IllegalStateException();
 		
-		game.sendMessage(new RoundCompleteMessage(word));
+		game.sendMessage(new RoundCancelledMessage(word));
 		timer.unregisterInterest(this);
+		
+		state = RoundState.CANCELLED;
 	}
 	
 	private void sendInitialMessages() {
@@ -148,12 +151,12 @@ public class Round implements IRound {
 		if (timeRemaining % 15 == 0)
 			sendTimeRemaining(timeRemaining);
 		
-		if (timeRemaining-- == 0) {
+		if (--timeRemaining == 0) {
 			timer.unregisterInterest(this);
 			roundComplete();
 		}
 	}
 	
-	private enum RoundState { NOT_STARTED, STARTED, COMPLETED } 
+	private enum RoundState { NOT_STARTED, STARTED, CANCELLED, COMPLETED } 
 
 }

@@ -123,6 +123,11 @@ function onload() {
 			disableDrawing()
 			disableGuessing()
 		}
+		else if (msg.roundCancelled) {
+			addMessage('This round was cancelled since the pictorist quit, the word in this round was: ' + msg.originalWord)
+			disableDrawing()
+			disableGuessing()
+		}
 		else if (msg.scores) {
 			str = 'Current Scores: '
 			
