@@ -47,10 +47,6 @@ public class Timer extends Thread implements ITimer {
 		}
 	}
 	
-	public static interface Action {
-		void run();
-	}
-	
 	public class Delay implements ITimed {
 		
 		private int ticksRemaining;

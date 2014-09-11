@@ -1,7 +1,5 @@
 package com.sankar.drawguess.api;
 
-import com.sankar.drawguess.Timer.Action;
-
 public interface ITimer {
 
 	void registerInterest(ITimed timed);
@@ -9,5 +7,9 @@ public interface ITimer {
 	void unregisterInterest(ITimed timed);
 
 	void schedule(int ticks, Action task);
+	
+	public interface Action {
+		void run();
+	}
 
 }
