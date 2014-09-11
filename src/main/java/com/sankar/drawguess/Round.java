@@ -151,7 +151,7 @@ public class Round implements IRound {
 		if (timeRemaining % 15 == 0)
 			sendTimeRemaining(timeRemaining);
 		
-		if (--timeRemaining == 0) {
+		if (timeRemaining-- == 0) {
 			timer.unregisterInterest(this);
 			roundComplete();
 		}

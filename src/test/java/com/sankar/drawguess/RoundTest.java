@@ -179,16 +179,16 @@ public class RoundTest {
 	@Test
 	public void testRoundCompletesIn60Seconds() {
 		round.start();
-		timer.tick(60);
+		timer.tick(61);
 		
-		Assert.assertTrue("Round should complete in 60 seconds", game.didRoundComplete());
+		Assert.assertTrue("Round should complete at end of 60 seconds", game.didRoundComplete());
 		Assert.assertTrue("Game should be notified when round completes", game.didRecieveMessageOfType(RoundCompleteMessage.class));
 	}
 	
 	@Test
 	public void testRoundUnRegistersWithTimerOnRoundComplete() {
 		round.start();
-		timer.tick(60);
+		timer.tick(61);
 		
 		Assert.assertFalse("Round should unregister itself with Timer on round completion", timer.isRegistered(round));
 	}
