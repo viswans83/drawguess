@@ -8,6 +8,12 @@ public class GuessMessage extends Message {
 	private String who;
 	private String guess;
 	
+	public GuessMessage() {}
+	
+	public GuessMessage(String guess) {
+		this.guess = guess;
+	}
+	
 	public void setWhoGuessed(IPlayer who) {
 		this.who = who.getName();
 	}

@@ -43,13 +43,12 @@ public class MockGame implements IGame {
 		return pts.get(player);
 	}
 	
-	private int msgCount;
-	private Set<Class<? extends Message>> messagesSent = new HashSet<>();
+	private Map<Class<? extends Message>, Integer> messagesRecieved = new HashMap<>();
 
 	@Override
 	public void sendMessage(Message message) {
-		msgCount++;
-		messagesSent.add(message.getClass());
+		Integer cnt = messagesRecieved.get(message.getClass());
+		messagesRecieved.put(message.getClass(), cnt == null ? 1 : cnt + 1);
 	}
 
 	@Override
@@ -58,11 +57,20 @@ public class MockGame implements IGame {
 	}
 	
 	public boolean didRecieveMessageOfType(Class<? extends Message> type) {
-		return messagesSent.contains(type);
+		return messagesRecieved.containsKey(type);
 	}
 	
 	public int totalMessagesRecieved() {
-		return msgCount;
+		int tot = 0;
+		for (Class<? extends Message> mc : messagesRecieved.keySet()) {
+			tot += messagesRecieved.get(mc);
+		}
+		return tot;
+	}
+	
+	public int totalMessagesRecievedOfType(Class<? extends Message> type) {
+		Integer cnt = messagesRecieved.get(type);
+		return cnt == null ? 0 : cnt;
 	}
 	
 	private boolean roundCompleted;
