@@ -124,7 +124,7 @@ function onload() {
 			disableGuessing()
 		}
 		else if (msg.roundCancelled) {
-			addMessage('This round was cancelled since the pictorist quit, the word in this round was: ' + msg.originalWord)
+			addMessage('This round was cancelled since there is nobody to guess. The word in this round was: ' + msg.originalWord)
 			disableDrawing()
 			disableGuessing()
 		}
