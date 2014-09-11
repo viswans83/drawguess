@@ -8,7 +8,6 @@ import java.util.Set;
 import com.sankar.drawguess.api.IGame;
 import com.sankar.drawguess.api.IPlayer;
 import com.sankar.drawguess.api.IRound;
-import com.sankar.drawguess.api.ITimed;
 import com.sankar.drawguess.api.ITimer;
 import com.sankar.drawguess.msg.DrawingMessage;
 import com.sankar.drawguess.msg.GuessMessage;
@@ -31,7 +30,8 @@ public class Round implements IRound {
 	private Set<IPlayer> playersWhoGuessedCorrectly = new HashSet<>();
 	private List<DrawingMessage> drawings = new ArrayList<>();
 	
-	private ITimed roundTimer;
+	private RoundState state = RoundState.NOT_STARTED;
+	private int timeRemaining = TICKS_PER_ROUND;
 	
 	public Round(String word, IPlayer pictorist, IGame game, ITimer timer) {
 		this.word = word;
@@ -42,10 +42,11 @@ public class Round implements IRound {
 	
 	@Override
 	public void start() {
-		if (roundTimer != null) 
+		if (state != RoundState.NOT_STARTED) 
 			throw new IllegalStateException();
 		
-		timer.registerInterest(createRoundTimer());
+		timer.registerInterest(this);
+		state = RoundState.STARTED;
 	}
 	
 	@Override
@@ -85,11 +86,11 @@ public class Round implements IRound {
 	
 	@Override
 	public void cancel() {
-		if (roundTimer == null)
+		if (state != RoundState.STARTED)
 			throw new IllegalStateException();
 		
 		game.sendMessage(new RoundCompleteMessage(word));
-		timer.unregisterInterest(roundTimer);
+		timer.unregisterInterest(this);
 	}
 	
 	private void sendInitialMessages() {
@@ -128,11 +129,8 @@ public class Round implements IRound {
 	}
 	
 	private void roundComplete() {
-		if (roundTimer == null)
-			throw new IllegalStateException();
-		
-		timer.unregisterInterest(roundTimer);
-		roundTimer = null;
+		timer.unregisterInterest(this);
+		state = RoundState.COMPLETED;
 		
 		game.sendMessage(new RoundCompleteMessage(word));
 		game.roundComplete();
@@ -142,28 +140,20 @@ public class Round implements IRound {
 		game.sendMessage(new TickMessage(timeRemaining));
 	}
 	
-	private ITimed createRoundTimer() {
-		roundTimer = new ITimed() {
-			
-			int timeRemaining = TICKS_PER_ROUND;
-
-			@Override
-			public void tick() {
-				if (timeRemaining == TICKS_PER_ROUND)
-					sendInitialMessages();
-				
-				if (timeRemaining % 15 == 0)
-					sendTimeRemaining(timeRemaining);
-				
-				if (timeRemaining-- == 0) {
-					timer.unregisterInterest(this);
-					roundComplete();
-				}
-			}
-			
-		};
+	@Override
+	public void tick() {
+		if (timeRemaining == TICKS_PER_ROUND)
+			sendInitialMessages();
 		
-		return roundTimer;
-	}		
+		if (timeRemaining % 15 == 0)
+			sendTimeRemaining(timeRemaining);
+		
+		if (timeRemaining-- == 0) {
+			timer.unregisterInterest(this);
+			roundComplete();
+		}
+	}
+	
+	private enum RoundState { NOT_STARTED, STARTED, COMPLETED } 
 
 }
