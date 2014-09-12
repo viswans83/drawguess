@@ -111,16 +111,20 @@ public class Game implements IGame {
 
 	@Override
 	public void playerGuessed(GuessMessage message, IPlayer player) {
-		if (round == null) return;
+		if (!playerAllowedToInteract(player)) return;
 		
 		round.handleGuess(player, message);
-	}
+	}	
 
 	@Override
 	public void playerDrew(DrawingMessage drawing, IPlayer player) {
-		if (round == null) return;
+		if (!playerAllowedToInteract(player)) return;
 		
 		round.handleDrawing(player, drawing);
+	}
+	
+	private boolean playerAllowedToInteract(IPlayer player) {
+		return round != null && players.contains(player);
 	}
 	
 	private void startNewRound(String word, IPlayer player) {

@@ -92,7 +92,7 @@ public class RoundTest {
 	}
 	
 	@Test
-	public void testDrawingsShouldNotBeSent() {
+	public void testOutOfTurnDrawingsShouldNotBeSent() {
 		round.start();
 		
 		IPlayer p = new MockPlayer("other player");
@@ -100,11 +100,11 @@ public class RoundTest {
 		round.handleDrawing(p, new DrawingMessage());
 		round.handleDrawing(p, new DrawingMessage());
 		
-		Assert.assertEquals("Game should not recieve drawings made by other than pictorist", 0, game.totalMessagesRecievedOfType(DrawingMessage.class));
+		Assert.assertEquals("Game should not recieve drawings made by players other than pictorist", 0, game.totalMessagesRecievedOfType(DrawingMessage.class));
 	}
 	
 	@Test
-	public void testRecordedDrawingsInRoundShouldBeSentToPlayer() {
+	public void testDrawingsInRoundShouldBeSentToPlayer() {
 		round.handleDrawing(player, new DrawingMessage());
 		round.handleDrawing(player, new DrawingMessage());
 		
@@ -116,10 +116,9 @@ public class RoundTest {
 	
 	@Test
 	public void testIncorrectGuessesShouldBeSent() {
-		round.start();
-		
 		IPlayer p = new MockPlayer("other player");
 		
+		round.start();
 		round.handleGuess(p, new GuessMessage("wrong"));
 		
 		Assert.assertEquals("Game should recieve incorrect guess", 1, game.totalMessagesRecievedOfType(GuessMessage.class));
@@ -127,10 +126,9 @@ public class RoundTest {
 	
 	@Test
 	public void testGuessesShouldNotBeSent() {
-		round.start();
-		
 		IPlayer p = new MockPlayer("other player");
 		
+		round.start();
 		round.handleGuess(p, new GuessMessage("test"));
 		round.handleGuess(player, new GuessMessage("wrong"));
 		
@@ -139,9 +137,9 @@ public class RoundTest {
 	
 	@Test
 	public void testAwardOnCorrectGuess() {
-		round.start();
-		
 		IPlayer p = new MockPlayer("other player");
+		
+		round.start();
 		round.handleGuess(p, new GuessMessage("test"));
 		
 		Assert.assertEquals("Pictorist should be awarded for correct guesses", 10, game.score(player));
@@ -156,7 +154,7 @@ public class RoundTest {
 	}
 	
 	@Test
-	public void testMessagesSentOnGameStart() {
+	public void testMessagesThanShouldBeSentOnGameStart() {
 		round.start();
 		timer.tick();
 		
