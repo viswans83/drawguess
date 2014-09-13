@@ -64,10 +64,10 @@ public class Game implements IGame {
 	
 	@Override
 	public void playerJoined(IPlayer player) {
-		if (round == null) return;
-		
 		scores.transmit(player);
-		round.sendDrawingsTo(player);
+		
+		if (round != null)
+			round.sendDrawingsTo(player);
 	}
 	
 	@Override
