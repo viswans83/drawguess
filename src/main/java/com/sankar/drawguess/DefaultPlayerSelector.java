@@ -2,6 +2,7 @@ package com.sankar.drawguess;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import com.sankar.drawguess.api.IPlayer;
 import com.sankar.drawguess.api.IPlayerSelector;
@@ -15,7 +16,7 @@ class DefaultPlayerSelector implements IPlayerSelector {
 	private int nextPlayerIndex = 0;
 	private boolean noMorePlayers;
 	
-	public DefaultPlayerSelector(IRoom room, List<IPlayer> players) {
+	public DefaultPlayerSelector(IRoom room, Set<IPlayer> players) {
 		this.room = room;
 		this.players = new ArrayList<>(players);
 	}

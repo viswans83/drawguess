@@ -1,15 +1,20 @@
 package com.sankar.drawguess;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.sankar.drawguess.api.IGame;
 import com.sankar.drawguess.api.IPlayer;
+import com.sankar.drawguess.api.IPlayerSelector;
 import com.sankar.drawguess.api.IRoom;
+import com.sankar.drawguess.api.IRound;
+import com.sankar.drawguess.api.IScores;
 import com.sankar.drawguess.api.ITimer;
+import com.sankar.drawguess.api.IWordProvider;
+import com.sankar.drawguess.api.factory.IRoundFactory;
 import com.sankar.drawguess.msg.DrawingMessage;
 import com.sankar.drawguess.msg.GameInProgressMessage;
 import com.sankar.drawguess.msg.GameOverMessage;
@@ -26,7 +31,7 @@ class Room implements IRoom {
 	private String name;
 	private ITimer timer;
 	
-	private List<IPlayer> players = new ArrayList<>();
+	private Set<IPlayer> players = new HashSet<>();
 	
 	private IGame game;
 	
@@ -97,7 +102,21 @@ class Room implements IRoom {
 	
 	private synchronized void startNewGame() {
 		log.info("Starting a new game in room [{}]", getName());
-		game = new Game(players, this, timer);
+		
+		Set<IPlayer> playersNow = new HashSet<IPlayer>(players);
+		
+		IScores scores = new Scores(playersNow);
+		IWordProvider wordProvider = new DefaultWordProvider();
+		IPlayerSelector playerSelector = new DefaultPlayerSelector(this, playersNow);
+		IRoundFactory roundFactory = new IRoundFactory() {
+			@Override
+			public IRound create(String word, IPlayer pictorist, IGame game) {
+				return new Round(word, pictorist, game, timer);
+			}
+		};
+		
+		
+		game = new Game(players, scores, wordProvider, playerSelector, roundFactory, this);
 		game.start();
 	}
 
