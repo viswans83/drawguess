@@ -72,6 +72,8 @@ public class Game implements IGame {
 	
 	@Override
 	public void playerQuit(IPlayer player) {
+		if (!isParticipating(player)) return;
+		
 		players.remove(player);
 		
 		if (players.size() < 2) {
@@ -119,20 +121,20 @@ public class Game implements IGame {
 
 	@Override
 	public void playerGuessed(GuessMessage message, IPlayer player) {
-		if (!isParticipatingInThisGame(player)) return;
+		if (round == null || !isParticipating(player)) return;
 		
 		round.handleGuess(player, message);
 	}	
 
 	@Override
 	public void playerDrew(DrawingMessage drawing, IPlayer player) {
-		if (!isParticipatingInThisGame(player)) return;
+		if (round == null || !isParticipating(player)) return;
 		
 		round.handleDrawing(player, drawing);
 	}
 	
-	private boolean isParticipatingInThisGame(IPlayer player) {
-		return round != null && players.contains(player);
+	public boolean isParticipating(IPlayer player) {
+		return players.contains(player);
 	}
 	
 	private void startNewRound(String word, IPlayer player) {

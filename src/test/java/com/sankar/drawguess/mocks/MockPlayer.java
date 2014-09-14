@@ -23,7 +23,7 @@ public class MockPlayer implements IPlayer {
 
 	@Override
 	public void sendMessage(Message message) {
-		if (messages.get(message.getClass()) == null)
+		if (!messages.containsKey(message.getClass()))
 			messages.put(message.getClass(), new ArrayList<Message>());
 		
 		messages.get(message.getClass()).add(message);

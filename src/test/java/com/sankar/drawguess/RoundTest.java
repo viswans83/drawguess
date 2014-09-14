@@ -136,14 +136,23 @@ public class RoundTest {
 	}
 	
 	@Test
-	public void testAwardOnCorrectGuess() {
+	public void testGuesserAwardOnCorrectGuess() {
+		IPlayer p = new MockPlayer("other player");
+		
+		round.start();
+		round.handleGuess(p, new GuessMessage("test"));
+		
+		Assert.assertEquals("Guesser should be awarded for correct guesses", 10, game.score(p));
+	}
+	
+	@Test
+	public void testPictoristAwardOnCorrectGuess() {
 		IPlayer p = new MockPlayer("other player");
 		
 		round.start();
 		round.handleGuess(p, new GuessMessage("test"));
 		
 		Assert.assertEquals("Pictorist should be awarded for correct guesses", 10, game.score(player));
-		Assert.assertEquals("Guesser should be awarded for correct guesses", 10, game.score(p));
 	}
 	
 	@Test
@@ -154,14 +163,41 @@ public class RoundTest {
 	}
 	
 	@Test
-	public void testMessagesThanShouldBeSentOnGameStart() {
+	public void testNewRoundMessageShouldBeSentToGameOnRoundStart() {
 		round.start();
 		timer.tick();
 		
 		Assert.assertTrue("NewRoundMessage should be sent on start", game.didRecieveMessageOfType(NewRoundMessage.class));
+	}
+	
+	@Test
+	public void testStartGuessingMessageShouldBeSentToGameOnRoundStart() {
+		round.start();
+		timer.tick();
+		
 		Assert.assertTrue("StartGuessingMessage should be sent on start", game.didRecieveMessageOfType(StartGuessingMessage.class));
+	}
+	
+	@Test
+	public void testTickMessageShouldBeSentToGameOnRoundStart() {
+		round.start();
+		timer.tick();
+		
 		Assert.assertTrue("TickMessage should be sent on start", game.didRecieveMessageOfType(TickMessage.class));
+	}
+	
+	@Test
+	public void testTotalMessagesSentToGameOnRoundStart() {
+		round.start();
+		timer.tick();
+		
 		Assert.assertEquals("Total messages sent on round start should match", 3, game.totalMessagesRecieved());
+	}
+	
+	@Test
+	public void testNewWordMessageSentToPlayerOnRoundStart() {
+		round.start();
+		timer.tick();
 		
 		Assert.assertTrue("NewWordMessage should be sent on start", player.didRecieveMessageOfType(NewWordMessage.class));
 	}
@@ -180,6 +216,13 @@ public class RoundTest {
 		timer.tick(61);
 		
 		Assert.assertTrue("Round should complete at end of 60 seconds", game.didRoundComplete());
+	}
+	
+	@Test
+	public void testGameNotifiedOnRoundComplete() {
+		round.start();
+		timer.tick(61);
+		
 		Assert.assertTrue("Game should be notified when round completes", game.didRecieveMessageOfType(RoundCompleteMessage.class));
 	}
 	
