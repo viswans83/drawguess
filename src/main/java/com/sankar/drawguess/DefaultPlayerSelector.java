@@ -8,7 +8,7 @@ import com.sankar.drawguess.api.IPlayer;
 import com.sankar.drawguess.api.IPlayerSelector;
 import com.sankar.drawguess.api.IRoom;
 
-class DefaultPlayerSelector implements IPlayerSelector {
+public class DefaultPlayerSelector implements IPlayerSelector {
 	
 	private IRoom room;
 	private List<IPlayer> players;

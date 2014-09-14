@@ -5,7 +5,13 @@ import javax.websocket.server.ServerEndpointConfig.Configurator;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.sankar.drawguess.api.IGameFactory;
+import com.sankar.drawguess.api.IRoomFactory;
+import com.sankar.drawguess.api.IRoundFactoryProvider;
 import com.sankar.drawguess.api.ITimer;
+import com.sankar.drawguess.factory.PictionaryGameFactory;
+import com.sankar.drawguess.factory.PictionaryRoomFactory;
+import com.sankar.drawguess.factory.PictionaryRoundFactoryProvider;
 
 public class GuiceEndpointConfigurator extends Configurator {
 	
@@ -15,8 +21,11 @@ public class GuiceEndpointConfigurator extends Configurator {
 			Timer timer = new Timer();
 			timer.start();
 			
-			bind(PlayerEndpoint.class);
 			bind(ITimer.class).toInstance(timer);
+			bind(IRoundFactoryProvider.class).to(PictionaryRoundFactoryProvider.class);
+			bind(IGameFactory.class).to(PictionaryGameFactory.class);
+			bind(IRoomFactory.class).to(PictionaryRoomFactory.class);
+			bind(PlayerEndpoint.class);
 		}
 	});
 	

@@ -7,14 +7,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.sankar.drawguess.api.IGame;
+import com.sankar.drawguess.api.IGameFactory;
 import com.sankar.drawguess.api.IPlayer;
-import com.sankar.drawguess.api.IPlayerSelector;
 import com.sankar.drawguess.api.IRoom;
-import com.sankar.drawguess.api.IRound;
-import com.sankar.drawguess.api.IScores;
-import com.sankar.drawguess.api.ITimer;
-import com.sankar.drawguess.api.IWordProvider;
-import com.sankar.drawguess.api.factory.IRoundFactory;
 import com.sankar.drawguess.msg.DrawingMessage;
 import com.sankar.drawguess.msg.GameInProgressMessage;
 import com.sankar.drawguess.msg.GameOverMessage;
@@ -24,20 +19,20 @@ import com.sankar.drawguess.msg.Message;
 import com.sankar.drawguess.msg.PlayerJoinedMessage;
 import com.sankar.drawguess.msg.PlayerQuitMessage;
 
-class Room implements IRoom {
+public class Room implements IRoom {
 	
 	private static Logger log = LogManager.getLogger();
 	
 	private String name;
-	private ITimer timer;
+	private IGameFactory gameFactory;
 	
 	private Set<IPlayer> players = new HashSet<>();
 	
 	private IGame game;
 	
-	public Room(String name, ITimer timer) {
+	public Room(String name, IGameFactory gameFactory) {
 		this.name = name;
-		this.timer = timer;
+		this.gameFactory = gameFactory;
 	}
 	
 	@Override
@@ -104,19 +99,7 @@ class Room implements IRoom {
 		log.info("Starting a new game in room [{}]", getName());
 		
 		Set<IPlayer> playersNow = new HashSet<IPlayer>(players);
-		
-		IScores scores = new Scores(playersNow);
-		IWordProvider wordProvider = new DefaultWordProvider();
-		IPlayerSelector playerSelector = new DefaultPlayerSelector(this, playersNow);
-		IRoundFactory roundFactory = new IRoundFactory() {
-			@Override
-			public IRound create(String word, IPlayer pictorist, IGame game) {
-				return new Round(word, pictorist, game, timer);
-			}
-		};
-		
-		
-		game = new Game(players, scores, wordProvider, playerSelector, roundFactory, this);
+		game = gameFactory.create(playersNow, this);
 		game.start();
 	}
 

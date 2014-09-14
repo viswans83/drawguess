@@ -18,7 +18,7 @@ import com.google.inject.Inject;
 import com.sankar.drawguess.api.IEndPoint;
 import com.sankar.drawguess.api.IPlayer;
 import com.sankar.drawguess.api.IRoom;
-import com.sankar.drawguess.api.ITimer;
+import com.sankar.drawguess.api.IRoomFactory;
 import com.sankar.drawguess.msg.Message;
 
 @ServerEndpoint(
@@ -32,14 +32,14 @@ public class PlayerEndpoint {
 	 
 	private static ConcurrentMap<String, IRoom> rooms = new ConcurrentHashMap<>();
 	
+	private IRoomFactory roomFactory;
+	
 	private IPlayer player;
 	private IRoom room;
 	
-	private ITimer timer;
-	
 	@Inject
-	public PlayerEndpoint(ITimer timer) {
-		this.timer = timer;
+	public PlayerEndpoint(IRoomFactory roomFactory) {
+		this.roomFactory = roomFactory;
 	}
 	
 	@OnOpen
@@ -56,9 +56,9 @@ public class PlayerEndpoint {
 		player.joinRoom(room);
 	}
 
-	private Room createNewRoom(String roomName) {
+	private IRoom createNewRoom(String roomName) {
 		log.info("Creating new room named [{}]", roomName);
-		return new Room(roomName, timer);
+		return roomFactory.create(roomName);
 	}	
 	
 	@OnMessage

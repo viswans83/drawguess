@@ -3,7 +3,7 @@ package com.sankar.drawguess.mocks;
 import com.sankar.drawguess.api.IGame;
 import com.sankar.drawguess.api.IPlayer;
 import com.sankar.drawguess.api.IRound;
-import com.sankar.drawguess.api.factory.IRoundFactory;
+import com.sankar.drawguess.api.IRoundFactory;
 
 public class MockRoundFactory implements IRoundFactory {
 	
