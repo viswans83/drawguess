@@ -21,8 +21,6 @@ import com.sankar.drawguess.msg.WordGuessedMessage;
 
 public class Round implements IRound {
 	
-	public static int TICKS_PER_ROUND = 60;
-	
 	private String word;
 	private IPlayer pictorist;
 	private IGame game;
@@ -32,7 +30,7 @@ public class Round implements IRound {
 	private List<DrawingMessage> drawings = new ArrayList<>();
 	
 	private RoundState state = RoundState.NOT_STARTED;
-	private int timeRemaining = TICKS_PER_ROUND;
+	private int timeRemaining = IRound.TICKS_PER_ROUND;
 	
 	public Round(String word, IPlayer pictorist, IGame game, ITimer timer) {
 		this.word = word;
@@ -145,7 +143,7 @@ public class Round implements IRound {
 	
 	@Override
 	public void tick() {
-		if (timeRemaining == TICKS_PER_ROUND)
+		if (timeRemaining == IRound.TICKS_PER_ROUND)
 			sendInitialMessages();
 		
 		if (timeRemaining % 15 == 0)

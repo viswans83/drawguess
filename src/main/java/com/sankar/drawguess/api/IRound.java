@@ -5,6 +5,8 @@ import com.sankar.drawguess.msg.GuessMessage;
 
 public interface IRound extends ITimed {
 
+	public static final int TICKS_PER_ROUND = 60;
+
 	void start();
 
 	void handleGuess(IPlayer player, GuessMessage guessMessage);
