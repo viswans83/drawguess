@@ -35,11 +35,15 @@ public class MockPlayer implements IPlayer {
 	}
 	
 	public boolean didRecieveMessageOfType(Class<? extends Message> type) {
-		return messages.get(type).size() > 0;
+		return messages.get(type) != null && messages.get(type).size() > 0;
 	}
 	
 	public int countRecievedMessageOfType(Class<? extends Message> type) {
 		return messages.get(type).size();
+	}
+	
+	public void clearMessages() {
+		messages.clear();
 	}
 	
 	@Override
