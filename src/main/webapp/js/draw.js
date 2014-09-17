@@ -142,8 +142,11 @@ function onload() {
 			enableGuessing();
 			addMessage(msg.who + ' is now drawing, start guessing!')
 		}
-		else if (msg.ticks) {
-			addMessage(msg.ticks + ' seconds left in this round')
+		else if (!isNaN(msg.ticks)) {
+			if (msg.ticks > 0)
+				addMessage(msg.ticks + ' seconds left in this round')
+			else
+				addMessage('Time up!')
 		}
 		else if (msg.wordGuessed) {
 			addMessage(msg.who + ' has guessed correctly')
