@@ -46,15 +46,15 @@ public class Player implements IPlayer {
 	}
 	
 	@Override
-	public void guessed(GuessMessage guess) {
+	public void guess(GuessMessage guess) {
 		if (room == null) throw new IllegalStateException();
 		
-		guess.setWhoGuessed(this);
+		guess.setWhoGuessed(name);
 		room.playerGuessed(guess, this);
 	}
 	
 	@Override
-	public void drew(DrawingMessage drawing) {
+	public void draw(DrawingMessage drawing) {
 		if (room == null) throw new IllegalStateException();
 		
 		room.playerDrew(drawing, this);

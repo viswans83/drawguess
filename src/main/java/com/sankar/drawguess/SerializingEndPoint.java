@@ -15,7 +15,7 @@ import org.apache.logging.log4j.Logger;
 import com.sankar.drawguess.api.IEndPoint;
 import com.sankar.drawguess.msg.Message;
 
-public class SerializingSendHandler implements IEndPoint {
+public class SerializingEndPoint implements IEndPoint {
 	
 	private static Logger log = LogManager.getLogger();
 	
@@ -26,7 +26,7 @@ public class SerializingSendHandler implements IEndPoint {
 	private AtomicBoolean sending = new AtomicBoolean();
 	private Deque<Message> pendingMessages = new ConcurrentLinkedDeque<>();
 	
-	public SerializingSendHandler(Session session, String playerName, String roomName) {
+	public SerializingEndPoint(Session session, String playerName, String roomName) {
 		this.session = session;
 		this.playerName = playerName;
 		this.roomName = roomName;

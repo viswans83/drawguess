@@ -1,5 +1,12 @@
 package com.sankar.drawguess.msg;
 
-public class DrawingMessage extends Message {
+import com.sankar.drawguess.api.IPlayer;
+
+public class DrawingMessage extends IncommingMessage {
+
+	@Override
+	public void dispatchTo(IPlayer player) {
+		player.draw(this);
+	}
 
 }

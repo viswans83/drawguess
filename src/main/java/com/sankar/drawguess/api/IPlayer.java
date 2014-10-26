@@ -11,8 +11,8 @@ public interface IPlayer extends IEndPoint {
 
 	void leaveCurrentRoom();
 
-	void guessed(GuessMessage guess);
+	void guess(GuessMessage guess);
 
-	void drew(DrawingMessage drawing);
+	void draw(DrawingMessage drawing);
 
 }

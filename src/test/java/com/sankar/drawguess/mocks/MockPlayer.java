@@ -70,7 +70,7 @@ public class MockPlayer implements IPlayer {
 	private GuessMessage lastGuessed;
 
 	@Override
-	public void guessed(GuessMessage guess) {
+	public void guess(GuessMessage guess) {
 		this.lastGuessed = guess;
 	}
 	
@@ -81,7 +81,7 @@ public class MockPlayer implements IPlayer {
 	private DrawingMessage lastDrawing;
 
 	@Override
-	public void drew(DrawingMessage drawing) {
+	public void draw(DrawingMessage drawing) {
 		this.lastDrawing = drawing;
 	}
 	

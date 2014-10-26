@@ -4,16 +4,21 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import com.sankar.drawguess.api.ITimed;
 import com.sankar.drawguess.api.ITimer;
 
+@Singleton
 public class Timer extends Thread implements ITimer {
 
 	private Set<ITimed> interested = Collections.synchronizedSet(new HashSet<ITimed>());
 	
+	@Inject
 	public Timer() {
 		setName("Game Timer");
 		setDaemon(true);
+		start();
 	}
 	
 	@Override

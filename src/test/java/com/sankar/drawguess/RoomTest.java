@@ -230,7 +230,7 @@ public class RoomTest {
 	}
 	
 	@Test
-	public void testReportsPlayerpresentCorrectly() {
+	public void testReportsPlayerPresentCorrectly() {
 		room.playerJoined(player1);
 		
 		Assert.assertTrue("Room should report players present correctly", room.isPresent(player1));

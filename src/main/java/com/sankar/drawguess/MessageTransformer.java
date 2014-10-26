@@ -12,12 +12,13 @@ import javax.websocket.EndpointConfig;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
-import com.sankar.drawguess.msg.LineDrawingMessage;
 import com.sankar.drawguess.msg.FloodFillMessage;
 import com.sankar.drawguess.msg.GuessMessage;
+import com.sankar.drawguess.msg.IncommingMessage;
+import com.sankar.drawguess.msg.LineDrawingMessage;
 import com.sankar.drawguess.msg.Message;
 
-public class MessageTransformer implements Decoder.Text<Message>, Encoder.Text<Message> {
+public class MessageTransformer implements Decoder.Text<IncommingMessage>, Encoder.Text<Message> {
 	
 	private Gson gson;
 
@@ -37,7 +38,7 @@ public class MessageTransformer implements Decoder.Text<Message>, Encoder.Text<M
 	}
 
 	@Override
-	public Message decode(String msg) throws DecodeException {
+	public IncommingMessage decode(String msg) throws DecodeException {
 		try (JsonReader r = new JsonReader(new StringReader(msg))) {
 			r.beginObject();
 			String type = r.nextName();

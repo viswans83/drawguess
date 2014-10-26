@@ -6,23 +6,24 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.sankar.drawguess.api.IGameFactory;
+import com.sankar.drawguess.api.IPlayerEndPointFactory;
 import com.sankar.drawguess.api.IRoomFactory;
+import com.sankar.drawguess.api.IRooms;
 import com.sankar.drawguess.api.ITimer;
 import com.sankar.drawguess.factory.PictionaryGameFactory;
 import com.sankar.drawguess.factory.PictionaryRoomFactory;
 
 public class GuiceEndpointConfigurator extends Configurator {
 	
-	private Injector injector = Guice.createInjector(new AbstractModule() {
+	private static Injector injector = Guice.createInjector(new AbstractModule() {
 		@Override
 		protected void configure() {
-			Timer timer = new Timer();
-			timer.start();
-			
-			bind(ITimer.class).toInstance(timer);
+			bind(ITimer.class).to(Timer.class);
+			bind(IPlayerEndPointFactory.class).to(PlayerEndPointFactory.class);
+			bind(IRooms.class).to(Rooms.class);
 			bind(IGameFactory.class).to(PictionaryGameFactory.class);
 			bind(IRoomFactory.class).to(PictionaryRoomFactory.class);
-			bind(PlayerEndpoint.class);
+			bind(WebSocketEndpoint.class);
 		}
 	});
 	

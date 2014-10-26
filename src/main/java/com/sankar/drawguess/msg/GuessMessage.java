@@ -2,7 +2,7 @@ package com.sankar.drawguess.msg;
 
 import com.sankar.drawguess.api.IPlayer;
 
-public class GuessMessage extends Message {
+public class GuessMessage extends IncommingMessage {
 	
 	@SuppressWarnings("unused")
 	private String who;
@@ -14,12 +14,17 @@ public class GuessMessage extends Message {
 		this.guess = guess;
 	}
 	
-	public void setWhoGuessed(IPlayer who) {
-		this.who = who.getName();
+	public void setWhoGuessed(String who) {
+		this.who = who;
 	}
 	
 	public String getGuess() {
 		return guess;
+	}
+
+	@Override
+	public void dispatchTo(IPlayer player) {
+		player.guess(this);
 	}
 	
 }
