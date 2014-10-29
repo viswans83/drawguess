@@ -1,7 +1,10 @@
 package com.sankar.drawguess;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -62,7 +65,7 @@ public class RoundTest {
 		round.start();
 		round.cancel();
 		
-		Assert.assertTrue("RoundCancelledMessage should be sent on round cancel", game.didRecieveMessageOfType(RoundCancelledMessage.class));
+		assertTrue(game.didRecieveMessageOfType(RoundCancelledMessage.class));
 	}
 	
 	@Test
@@ -70,7 +73,7 @@ public class RoundTest {
 		round.start();
 		round.cancel();
 		
-		Assert.assertFalse("Round should unregister with Timer on cancel", timer.isRegistered(round));
+		assertFalse(timer.isRegistered(round));
 	}
 	
 	@Test
@@ -78,7 +81,7 @@ public class RoundTest {
 		round.start();
 		round.playerQuit(player);
 		
-		Assert.assertTrue("Round should complete if pictorist quits", game.didRoundComplete());
+		assertTrue(game.didRoundComplete());
 	}
 	
 	@Test
@@ -88,7 +91,7 @@ public class RoundTest {
 		round.handleDrawing(player, new DrawingMessage());
 		round.handleDrawing(player, new DrawingMessage());
 		
-		Assert.assertEquals("Game should recieve all drawings made", 2, game.totalMessagesRecievedOfType(DrawingMessage.class));
+		assertEquals(2, game.totalMessagesRecievedOfType(DrawingMessage.class));
 	}
 	
 	@Test
@@ -100,7 +103,7 @@ public class RoundTest {
 		round.handleDrawing(p, new DrawingMessage());
 		round.handleDrawing(p, new DrawingMessage());
 		
-		Assert.assertEquals("Game should not recieve drawings made by players other than pictorist", 0, game.totalMessagesRecievedOfType(DrawingMessage.class));
+		assertEquals(0, game.totalMessagesRecievedOfType(DrawingMessage.class));
 	}
 	
 	@Test
@@ -111,7 +114,7 @@ public class RoundTest {
 		MockPlayer p = new MockPlayer("other player");
 		round.sendDrawingsTo(p);
 		
-		Assert.assertEquals("Player should recieve all recorded drawings", 2, p.countRecievedMessageOfType(DrawingMessage.class));
+		assertEquals(2, p.countRecievedMessageOfType(DrawingMessage.class));
 	}
 	
 	@Test
@@ -121,7 +124,7 @@ public class RoundTest {
 		round.start();
 		round.handleGuess(p, new GuessMessage("wrong"));
 		
-		Assert.assertEquals("Game should recieve incorrect guess", 1, game.totalMessagesRecievedOfType(GuessMessage.class));
+		assertEquals(1, game.totalMessagesRecievedOfType(GuessMessage.class));
 	}
 	
 	@Test
@@ -132,7 +135,7 @@ public class RoundTest {
 		round.handleGuess(p, new GuessMessage("test"));
 		round.handleGuess(player, new GuessMessage("wrong"));
 		
-		Assert.assertEquals("Game should not recieve correct guess", 0, game.totalMessagesRecievedOfType(GuessMessage.class));
+		assertEquals(0, game.totalMessagesRecievedOfType(GuessMessage.class));
 	}
 	
 	@Test
@@ -142,7 +145,7 @@ public class RoundTest {
 		round.start();
 		round.handleGuess(p, new GuessMessage("test"));
 		
-		Assert.assertEquals("Guesser should be awarded for correct guesses", 10, game.score(p));
+		assertEquals(10, game.score(p));
 	}
 	
 	@Test
@@ -152,14 +155,14 @@ public class RoundTest {
 		round.start();
 		round.handleGuess(p, new GuessMessage("test"));
 		
-		Assert.assertEquals("Pictorist should be awarded for correct guesses", 10, game.score(player));
+		assertEquals(10, game.score(player));
 	}
 	
 	@Test
 	public void testRoundRegistersWithTimerOnStart() {
 		round.start();
 		
-		Assert.assertTrue("Round should register itself with Timer on start of round", timer.isRegistered(round));
+		assertTrue(timer.isRegistered(round));
 	}
 	
 	@Test
@@ -167,7 +170,7 @@ public class RoundTest {
 		round.start();
 		timer.tick();
 		
-		Assert.assertTrue("NewRoundMessage should be sent on start", game.didRecieveMessageOfType(NewRoundMessage.class));
+		assertTrue(game.didRecieveMessageOfType(NewRoundMessage.class));
 	}
 	
 	@Test
@@ -175,7 +178,7 @@ public class RoundTest {
 		round.start();
 		timer.tick();
 		
-		Assert.assertTrue("StartGuessingMessage should be sent on start", game.didRecieveMessageOfType(StartGuessingMessage.class));
+		assertTrue(game.didRecieveMessageOfType(StartGuessingMessage.class));
 	}
 	
 	@Test
@@ -183,7 +186,7 @@ public class RoundTest {
 		round.start();
 		timer.tick();
 		
-		Assert.assertTrue("TickMessage should be sent on start", game.didRecieveMessageOfType(TickMessage.class));
+		assertTrue(game.didRecieveMessageOfType(TickMessage.class));
 	}
 	
 	@Test
@@ -191,7 +194,7 @@ public class RoundTest {
 		round.start();
 		timer.tick();
 		
-		Assert.assertEquals("Total messages sent on round start should match", 3, game.totalMessagesRecieved());
+		assertEquals(3, game.totalMessagesRecieved());
 	}
 	
 	@Test
@@ -199,7 +202,7 @@ public class RoundTest {
 		round.start();
 		timer.tick();
 		
-		Assert.assertTrue("NewWordMessage should be sent on start", player.didRecieveMessageOfType(NewWordMessage.class));
+		assertTrue(player.didRecieveMessageOfType(NewWordMessage.class));
 	}
 	
 	@Test
@@ -207,7 +210,7 @@ public class RoundTest {
 		round.start();
 		timer.tick(46);
 		
-		Assert.assertEquals("4 TickMessages should have been sent at the end of 45 seconds", 4, game.totalMessagesRecievedOfType(TickMessage.class));
+		assertEquals(4, game.totalMessagesRecievedOfType(TickMessage.class));
 	}
 	
 	@Test
@@ -215,7 +218,7 @@ public class RoundTest {
 		round.start();
 		timer.tick(61);
 		
-		Assert.assertTrue("Round should complete at end of 60 seconds", game.didRoundComplete());
+		assertTrue(game.didRoundComplete());
 	}
 	
 	@Test
@@ -223,7 +226,7 @@ public class RoundTest {
 		round.start();
 		timer.tick(61);
 		
-		Assert.assertTrue("Game should be notified when round completes", game.didRecieveMessageOfType(RoundCompleteMessage.class));
+		assertTrue(game.didRecieveMessageOfType(RoundCompleteMessage.class));
 	}
 	
 	@Test
@@ -231,7 +234,7 @@ public class RoundTest {
 		round.start();
 		timer.tick(61);
 		
-		Assert.assertFalse("Round should unregister itself with Timer on round completion", timer.isRegistered(round));
+		assertFalse(timer.isRegistered(round));
 	}
 
 }

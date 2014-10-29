@@ -1,10 +1,12 @@
 package com.sankar.drawguess;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -59,60 +61,46 @@ public class GameTest {
 		game = new Game(players, scores, wordProvider, playerSelector, roundFactory, room);
 	}
 	
-	@After
-	public void after() {
-		player1 = player2 = null;
-		
-		players = null;
-		scores = null;
-		wordProvider = null;
-		playerSelector = null;
-		roundFactory = null;
-		room = null;
-		
-		game = null;
-	}
-	
 	@Test
 	public void testNewGameMessageSentToRoomOnStart() {
 		game.start();
 		
-		Assert.assertTrue("NewGameMessage should be sent to the room on start of game", room.didRecieveMessageOfType(NewGameMessage.class));
+		assertTrue(room.didRecieveMessageOfType(NewGameMessage.class));
 	}
 	
 	@Test
 	public void testWordIsSelectedOnStart() {
 		game.start();
 		
-		Assert.assertEquals("A new word should be selected when a game begins", 1, wordProvider.countOfWordsWorvided());
+		assertEquals(1, wordProvider.countOfWordsWorvided());
 	}
 	
 	@Test
 	public void testPictoristIsSelectedOnStart() {
 		game.start();
 		
-		Assert.assertEquals("A player should be selected to draw when a game begins", 1, playerSelector.countOfPlayersSelected());
+		assertEquals(1, playerSelector.countOfPlayersSelected());
 	}
 	
 	@Test
 	public void testScoresSentToRoomOnStart() {
 		game.start();
 		
-		Assert.assertTrue("Scores should be sent to the room when a game starts", scores.didTransmitTo(room));
+		assertTrue("Scores should be sent to the room when a game starts", scores.didTransmitTo(room));
 	}
 	
 	@Test
 	public void testNewRoundIsCreatedOnStart() {
 		game.start();
 		
-		Assert.assertEquals("A new round should be created when game starts", 1, roundFactory.countOfRoundsCreated());
+		assertEquals(1, roundFactory.countOfRoundsCreated());
 	}
 	
 	@Test
 	public void testNewRoundStartWhenGameStart() {
 		game.start();
 		
-		Assert.assertTrue("A new round should be started when game starts", round.didStart());
+		assertTrue(round.didStart());
 	}
 	
 	@Test
@@ -121,7 +109,7 @@ public class GameTest {
 		
 		game.playerJoined(p);
 		
-		Assert.assertTrue("When a player joins a game, scores should be sent to the new player", scores.didTransmitTo(p));
+		assertTrue(scores.didTransmitTo(p));
 	}
 	
 	@Test
@@ -133,14 +121,14 @@ public class GameTest {
 		
 		game.playerJoined(p);
 		
-		Assert.assertTrue("When a player joins a game and a round is active, drawings should be sent to the new player", round.wereDrawingsSentTo(p));
+		assertTrue("When a player joins a game and a round is active, drawings should be sent to the new player", round.wereDrawingsSentTo(p));
 	}
 	
 	@Test
 	public void testPlayerRemovedFromGameOnQuit() {
 		game.playerQuit(player1);
 		
-		Assert.assertFalse("Player should be removed from game when he quits", game.isParticipating(player1));
+		assertFalse(game.isParticipating(player1));
 	}
 	
 	@Test
@@ -148,7 +136,7 @@ public class GameTest {
 		game.start();
 		game.playerQuit(player3);
 		
-		Assert.assertTrue("Active Round should be notified if player quits", round.didRecieveQuitOf(player3));
+		assertTrue(round.didRecieveQuitOf(player3));
 	}
 	
 	@Test
@@ -157,7 +145,7 @@ public class GameTest {
 		game.playerQuit(player3);
 		game.playerQuit(player2);
 		
-		Assert.assertTrue("Active round should be cancelled if number of players are insufficient to continue the round", round.isCancelled());
+		assertTrue(round.isCancelled());
 	}
 	
 	@Test
@@ -168,7 +156,7 @@ public class GameTest {
 		scores.clearSentTo();
 		game.playerQuit(player2);
 		
-		Assert.assertTrue("Scores should be sent to the room when an Active round is cancelled due to insufficient players", scores.didTransmitTo(room));
+		assertTrue(scores.didTransmitTo(room));
 	}
 	
 	@Test
@@ -179,7 +167,7 @@ public class GameTest {
 		scores.clearSentTo();
 		game.playerQuit(player2);
 		
-		Assert.assertTrue("Scores should be sent to the room when an Active round is cancelled due to insufficient players", room.didGameEnd());
+		assertTrue(room.didGameEnd());
 	}
 	
 	@Test
@@ -187,7 +175,7 @@ public class GameTest {
 		game.start();
 		game.award(player1, 10);
 		
-		Assert.assertEquals("Scores awarded to player should be tracked", 10, scores.getPoints(player1));
+		assertEquals(10, scores.getPoints(player1));
 	}
 	
 	@Test
@@ -195,43 +183,43 @@ public class GameTest {
 		game.start();
 		game.award(player1, 10);
 		
-		Assert.assertTrue("Player should be notified of awards", player1.didRecieveMessageOfType(AwardMessage.class));
+		assertTrue(player1.didRecieveMessageOfType(AwardMessage.class));
 	}
 	
 	@Test
 	public void testMessagesAreSentToRoom() {
 		game.sendMessage(new MockMessage());
 		
-		Assert.assertTrue("Room should recieve messages sent to the game", room.didRecieveMessageOfType(MockMessage.class));
+		assertTrue(room.didRecieveMessageOfType(MockMessage.class));
 	}
 	
 	@Test
 	public void testMessagesAreSentToRoom2() {
 		game.sendMessageToAllBut(player1, new MockMessage());
 		
-		Assert.assertTrue("Room should recieve messages sent to the game", room.didRecieveMessageOfType(MockMessage.class));
+		assertTrue(room.didRecieveMessageOfType(MockMessage.class));
 	}
 	
 	@Test
 	public void testNewRoundStartsOnRoundComplete() {
 		game.roundComplete();
 		
-		Assert.assertEquals("A new round should be created when a round completes and there are players whose turns to draw are pending", 1, roundFactory.countOfRoundsCreated());
-		Assert.assertTrue("A new round should begin when a round completes and there are players whose turns to draw are pending", round.didStart());
+		assertEquals(1, roundFactory.countOfRoundsCreated());
+		assertTrue(round.didStart());
 	}
 	
 	@Test
 	public void testNewWordSelectedOnRoundComplete() {
 		game.roundComplete();
 		
-		Assert.assertEquals("A new word should be selected if a new round started due to the current round completing", 1, wordProvider.countOfWordsWorvided());
+		assertEquals(1, wordProvider.countOfWordsWorvided());
 	}
 	
 	@Test
 	public void testNewPlayerSelectedOnRoundComplete() {
 		game.roundComplete();
 		
-		Assert.assertEquals("A new pictorist should be selected if a new round started due to the current round completing", 1, playerSelector.countOfPlayersSelected());
+		assertEquals(1, playerSelector.countOfPlayersSelected());
 	}
 	
 	@Test
@@ -239,7 +227,7 @@ public class GameTest {
 		playerSelector.setNoMorePlayers();
 		game.roundComplete();
 		
-		Assert.assertTrue("Game should be over if a round completes and all players remaining have completed their turns", room.didGameEnd());
+		assertTrue(room.didGameEnd());
 	}
 	
 	@Test
@@ -247,7 +235,7 @@ public class GameTest {
 		game.start();
 		game.playerGuessed(new GuessMessage(), player1);
 		
-		Assert.assertTrue("Guesses from a participating player should be sent to the active round", round.didRecieveGuessFrom(player1));
+		assertTrue(round.didRecieveGuessFrom(player1));
 	}
 	
 	@Test
@@ -257,7 +245,7 @@ public class GameTest {
 		game.start();
 		game.playerGuessed(new GuessMessage(), p);
 		
-		Assert.assertFalse("Guesses from a non participating player should not be sent to the active round", round.didRecieveGuessFrom(p));
+		assertFalse(round.didRecieveGuessFrom(p));
 	}
 	
 	@Test
@@ -265,7 +253,7 @@ public class GameTest {
 		game.start();
 		game.playerDrew(new LineDrawingMessage(), player1);
 		
-		Assert.assertTrue("Guesses from a participating player should be sent to the active round", round.didRecieveDrawingFrom(player1));
+		assertTrue(round.didRecieveDrawingFrom(player1));
 	}
 	
 }

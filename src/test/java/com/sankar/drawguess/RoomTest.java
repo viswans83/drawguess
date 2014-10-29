@@ -1,7 +1,9 @@
 package com.sankar.drawguess;
 
-import org.junit.After;
-import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -36,26 +38,16 @@ public class RoomTest {
 		room = new Room("a room", gameFactory);
 	}
 	
-	@After
-	public void after() {
-		player1 = player2 = player3 = player4 = null;
-		gameFactory = null;
-		room = null;
-	}
-	
 	@Test
 	public void testReturnsCorrectName() {
-		Assert.assertEquals("Room should return its name correctly", "a room", room.getName());
+		assertEquals("a room", room.getName());
 	}
 	
 	@Test
 	public void testPlayerRecievesInsufficientPlayersMessage() {
 		room.playerJoined(player1);
 		
-		Assert.assertTrue(
-				"Player should recieve InsufficientPlayersMessage when " +
-				"room doesnt have sufficient players to start a new game", 
-				player1.didRecieveMessageOfType(InsufficientPlayersMessage.class));
+		assertTrue(player1.didRecieveMessageOfType(InsufficientPlayersMessage.class));
 	}
 	
 	@Test
@@ -63,10 +55,7 @@ public class RoomTest {
 		room.playerJoined(player1);
 		room.playerJoined(player2);
 		
-		Assert.assertTrue(
-				"Existing players in room should recieve a PlayerJoinedMessage " +
-				"when a new player joins the room", 
-				player1.didRecieveMessageOfType(PlayerJoinedMessage.class));
+		assertTrue(player1.didRecieveMessageOfType(PlayerJoinedMessage.class));
 	}
 	
 	@Test
@@ -75,7 +64,7 @@ public class RoomTest {
 		room.playerJoined(player2);
 		room.playerJoined(player3);
 		
-		Assert.assertEquals("A new game should be created when sufficient players join the room", 1, gameFactory.countOfGamesCreated());
+		assertEquals(1, gameFactory.countOfGamesCreated());
 	}
 	
 	@Test
@@ -84,7 +73,7 @@ public class RoomTest {
 		room.playerJoined(player2);
 		room.playerJoined(player3);
 		
-		Assert.assertTrue("A new game should be created when sufficient players join the room", gameFactory.getGame().didStart());
+		assertTrue(gameFactory.getGame().didStart());
 	}
 	
 	@Test
@@ -94,7 +83,7 @@ public class RoomTest {
 		room.playerJoined(player3);
 		room.playerJoined(player4);
 		
-		Assert.assertTrue("Player should recieve GameInProgressMessage when room has an in-progress game", player4.didRecieveMessageOfType(GameInProgressMessage.class));
+		assertTrue(player4.didRecieveMessageOfType(GameInProgressMessage.class));
 	}
 	
 	@Test
@@ -104,10 +93,7 @@ public class RoomTest {
 		
 		room.playerQuit(player1);
 		
-		Assert.assertTrue(
-				"Existing players in room should recieve a PlayerQuitMessage " +
-				"when an existing player leaves the room", 
-				player2.didRecieveMessageOfType(PlayerQuitMessage.class));
+		assertTrue(player2.didRecieveMessageOfType(PlayerQuitMessage.class));
 	}
 	
 	@Test
@@ -118,7 +104,7 @@ public class RoomTest {
 		
 		room.playerQuit(player1);
 		
-		Assert.assertTrue("The in-progress game should be notified when an existing player leaves the room", gameFactory.getGame().didQuit(player1));
+		assertTrue(gameFactory.getGame().didQuit(player1));
 	}
 	
 	@Test
@@ -129,7 +115,7 @@ public class RoomTest {
 		
 		room.playerGuessed(new GuessMessage(), player1);
 		
-		Assert.assertTrue("Guesses in the room should be forwarded to the in-progress game", gameFactory.getGame().didGuess(player1));
+		assertTrue(gameFactory.getGame().didGuess(player1));
 	}
 	
 	@Test
@@ -140,7 +126,7 @@ public class RoomTest {
 		
 		room.playerDrew(new LineDrawingMessage(), player1);
 		
-		Assert.assertTrue("Drawings in the room should be forwarded to the in-progress game", gameFactory.getGame().didDraw(player1));
+		assertTrue(gameFactory.getGame().didDraw(player1));
 	}
 	
 	@Test
@@ -150,8 +136,8 @@ public class RoomTest {
 		
 		room.sendMessage(new MockMessage());
 		
-		Assert.assertTrue("Messages sent to the room should be forwarded to all players", player1.didRecieveMessageOfType(MockMessage.class));
-		Assert.assertTrue("Messages sent to the room should be forwarded to all players", player2.didRecieveMessageOfType(MockMessage.class));
+		assertTrue(player1.didRecieveMessageOfType(MockMessage.class));
+		assertTrue(player2.didRecieveMessageOfType(MockMessage.class));
 	}
 	
 	@Test
@@ -162,9 +148,9 @@ public class RoomTest {
 		
 		room.sendMessageToAllBut(player1, new MockMessage());
 		
-		Assert.assertFalse("Messages sent to the room should be forwarded to appropriate players", player1.didRecieveMessageOfType(MockMessage.class));
-		Assert.assertTrue("Messages sent to the room should be forwarded to appropriate players", player2.didRecieveMessageOfType(MockMessage.class));
-		Assert.assertTrue("Messages sent to the room should be forwarded to appropriate players", player3.didRecieveMessageOfType(MockMessage.class));
+		assertFalse(player1.didRecieveMessageOfType(MockMessage.class));
+		assertTrue(player2.didRecieveMessageOfType(MockMessage.class));
+		assertTrue(player3.didRecieveMessageOfType(MockMessage.class));
 	}
 	
 	@Test
@@ -175,7 +161,7 @@ public class RoomTest {
 		
 		room.gameOver();
 		
-		Assert.assertEquals("Room much create a new game when the current game completes and there are sufficient players", 2, gameFactory.countOfGamesCreated());
+		assertEquals(2, gameFactory.countOfGamesCreated());
 	}
 	
 	@Test
@@ -187,7 +173,7 @@ public class RoomTest {
 		room.playerQuit(player1);
 		room.gameOver();
 		
-		Assert.assertEquals("Room must not create a new game when the current game completes and there are insufficient players", 1, gameFactory.countOfGamesCreated());
+		assertEquals(1, gameFactory.countOfGamesCreated());
 	}
 	
 	@Test
@@ -203,17 +189,9 @@ public class RoomTest {
 		
 		room.gameOver();
 		
-		Assert.assertTrue(
-				"Existing players should recieve InsufficientPlayersMessage " + 
-				"when the current game completes and there are insufficient players to begin " + 
-				"a new game", 
-				player2.didRecieveMessageOfType(InsufficientPlayersMessage.class));
+		assertTrue(player2.didRecieveMessageOfType(InsufficientPlayersMessage.class));
 		
-		Assert.assertTrue(
-				"Existing players should recieve InsufficientPlayersMessage " + 
-				"when the current game completes and there are insufficient players to begin " + 
-				"a new game", 
-				player3.didRecieveMessageOfType(InsufficientPlayersMessage.class));
+		assertTrue(player3.didRecieveMessageOfType(InsufficientPlayersMessage.class));
 	}
 	
 	@Test
@@ -224,16 +202,16 @@ public class RoomTest {
 		
 		room.gameOver();
 		
-		Assert.assertTrue("Players should recieve GameOverMessage when game completes", player1.didRecieveMessageOfType(GameOverMessage.class));
-		Assert.assertTrue("Players should recieve GameOverMessage when game completes", player2.didRecieveMessageOfType(GameOverMessage.class));
-		Assert.assertTrue("Players should recieve GameOverMessage when game completes", player3.didRecieveMessageOfType(GameOverMessage.class));
+		assertTrue(player1.didRecieveMessageOfType(GameOverMessage.class));
+		assertTrue(player2.didRecieveMessageOfType(GameOverMessage.class));
+		assertTrue(player3.didRecieveMessageOfType(GameOverMessage.class));
 	}
 	
 	@Test
 	public void testReportsPlayerPresentCorrectly() {
 		room.playerJoined(player1);
 		
-		Assert.assertTrue("Room should report players present correctly", room.isPresent(player1));
+		assertTrue(room.isPresent(player1));
 	}
 
 }
