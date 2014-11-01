@@ -1,4 +1,4 @@
-define(function() {
+define(['color'], function(Color) {
 	
 	var Listener = function(player, drawing, messages) {
 		this.player = player
@@ -24,7 +24,12 @@ define(function() {
 			}
 			
 			else if (msg.floodFill) {
-				drawing.floodFill(msg.floodFill, msg.color)
+				var p = msg.floodFill
+				
+				var c = msg.color
+				c = new Color(c.r, c.g, c.b)
+				
+				drawing.floodFill(p, c)
 			}
 			
 			else if (msg.gameInProgress) {

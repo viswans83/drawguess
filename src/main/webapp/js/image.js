@@ -11,7 +11,7 @@ define(['color'], function(Color) {
 			var c = this.img.data
 			var pos = ((p.y - 1) * 300 + p.x) * 4
 
-			return new Color(c[pos + 0], c[pos + 1], c[pos + 2], c[pos + 3])
+			return new Color(c[pos + 0], c[pos + 1], c[pos + 2])
 		},
 
 		setColor : function(p, color) {
