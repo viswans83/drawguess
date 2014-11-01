@@ -1,13 +1,29 @@
 require(['vendor/domReady', 'palette', 'messages', 'player', 'connection', 'listener', 'drawing'],
 
 function(domReady, Palette, Messages, Player, Connection, Listener, Drawing) {
+	
+	/** Credit: James Padolsey
+	  * http://james.padolsey.com/javascript/getting-a-fully-qualified-url/
+	***/
+	function absoluteURL(proto, relpath) {
+		var root = window.location.protocol + '://' + window.location.host + '/'
+		
+		var url
+	    var img = document.createElement('img')
+	    img.src = ''
+	    url = img.src
+	    
+		var relstart = root.length - 2
+		var rellength = url.length - root.length + 2
+	    
+		return proto + '://' + window.location.host + url.substr(relstart, rellength) + relpath;
+	}
 
 	domReady(function() {
 		var room = prompt('Enter room: ', 'default')
 		var name = prompt('Enter name: ', 'default')
-
-		var wsurl = document.getElementById('wsurl')
-		var sock = new WebSocket('ws://' + wsurl.host + wsurl.pathname + '/' + room + '/' + name)
+		
+		var sock = new WebSocket(absoluteURL('ws', 'ws/' + room + '/' + name))
 
 		// -------- Create Components --------- //
 
