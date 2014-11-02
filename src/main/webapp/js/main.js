@@ -46,13 +46,6 @@ function(domReady, Palette, Messages, Player, Connection, Listener, Drawing) {
 		player.setConnection(connection)
 		
 		drawing.clear()
-		
-		// Press 'd' to enable drawing in order to debug
-		document.body.addEventListener('keydown', function(ev) {
-			if (event.which == 68) {
-				drawing.enableDrawing()
-			}
-		})
 	})
 
 })

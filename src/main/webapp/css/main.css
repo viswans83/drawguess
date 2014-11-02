@@ -1,0 +1,27 @@
+#title, #drawing, #colors,
+#guess, #messages {
+	display: block;
+	margin: 1em auto;
+}
+
+#title, #messages {
+	width: -moz-fit-content;
+	width: -webkit-fit-content;
+	text-align: center;
+}
+
+#messages {
+	max-height: 12em;
+	overflow: scroll;
+}
+
+#messages > div {
+	width: -moz-fit-content;
+	width: -webkit-fit-content;
+	max-width: 300px;
+	font-size: 0.8em;
+	padding: 0.2em;
+	margin: 0.2em auto;
+	background-color: turquoise;
+	border-radius: 0.5em;
+}

@@ -15,6 +15,7 @@ define(['point', 'path', 'image', 'floodfill'], function(Point, Path, Image, flo
 		context.lineWidth = 1
 		context.lineCap = 'round'
 		context.strokeStyle = 'rgb(0,0,0)'
+		context.fillStyle = 'rgb(255,255,255)'
 		
 		this.clickHandler = function(ev) {
 			old_x = ev.pageX - canvas.offsetLeft
@@ -91,10 +92,8 @@ define(['point', 'path', 'image', 'floodfill'], function(Point, Path, Image, flo
 		},
 		
 		clear: function() {
-			var ctx = this.context
-			
-			ctx.clearRect(0, 0, 300, 300)
-			ctx.strokeRect(0, 0, 300, 300)
+			this.context.fillRect(0, 0, 300, 300)
+			this.context.strokeRect(0, 0, 300, 300)
 		},
 		
 		floodFill: function(p, targetColor) {
